@@ -2,6 +2,14 @@
 Docker Environment for compiling and running miking/mcore programs. Each kind
 of image is placed under its own directory.
 
+## Dependencies
+
+The following dependencies are needed to build the docker images:
+
+* `docker` (with a running deamon in the background)
+* `make`
+* `sudo`
+
 # Build
 
 The images are configured to be built via makefiles. Build the image with its
