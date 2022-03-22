@@ -25,11 +25,7 @@ RUN opam init --disable-sandboxing --auto-setup
 RUN opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
 
 # Install ocaml packages
-RUN opam install -y dune               \
-                    linenoise          \
-                    ocamlformat=0.20.1 \
-                    owl \
-                    lwt
+RUN opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.20.1
 
 # Add the opam environment as default
 RUN echo "eval \$(opam env)" >> /root/.bashrc
