@@ -16,7 +16,7 @@ RUN echo "alias ls='ls --color=auto'" >> /root/.bashrc
 RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies available through apk
-RUN apk add opam make m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev
+RUN apk add opam make m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev
 
 # Initialize opam
 RUN opam init --disable-sandboxing --auto-setup
@@ -24,25 +24,27 @@ RUN opam init --disable-sandboxing --auto-setup
 # Create the 4.12 environment
 RUN opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
 
-# Install dune and line noise
-RUN opam install -y dune linenoise
+# Install ocaml packages
+RUN opam install -y dune               \
+                    linenoise          \
+                    ocamlformat=0.20.1 \
+                    owl \
+                    lwt
 
 # Add the opam environment as default
 RUN echo "eval \$(opam env)" >> /root/.bashrc
 
 # Download the latest version of the miking repository
-RUN cd /tmp && git clone https://github.com/miking-lang/miking
+RUN mkdir /src && cd /src && git clone https://github.com/miking-lang/miking
 
-WORKDIR /tmp/miking
+WORKDIR /src/miking
 
 # Use the following commit as baseline
-RUN git checkout 1fabbca9a187e71f50c2c47c4b8eeb972313da15
+RUN git checkout 707a8a6dab95abca5a5f73c22960e1cdac39742a
 
 RUN eval $(opam env) && make install
 
 WORKDIR /root
-
-RUN rm -rf /tmp/miking
 
 # Export the opam env contents to docker ENV
 ENV PATH="/root/.opam/4.12.0+domains/bin:/root/.local/bin:$PATH"
