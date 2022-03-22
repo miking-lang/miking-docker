@@ -3,7 +3,7 @@
 # NOTE: VERSION_SUFFIX to be set in subfolders' Makefile
 
 IMAGENAME=miking
-VERSION=0.0.0-dev1-$(VERSION_SUFFIX)
+VERSION=dev2-$(VERSION_SUFFIX)
 LATEST_VERSION=latest-$(VERSION_SUFFIX)
 
 build:
