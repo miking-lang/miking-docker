@@ -2,7 +2,7 @@
 
 # NOTE: VERSION_SUFFIX to be set in subfolders' Makefile
 
-IMAGENAME=miking
+IMAGENAME=mikinglang/miking
 VERSION=dev2-$(VERSION_SUFFIX)
 LATEST_VERSION=latest-$(VERSION_SUFFIX)
 
@@ -12,6 +12,10 @@ build:
 	                  --file Dockerfile \
 	                  ..
 	sudo docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):$(LATEST_VERSION)
+
+push:
+	sudo docker push $(IMAGENAME):$(VERSION)
+	sudo docker push $(IMAGENAME):$(LATEST_VERSION)
 
 run:
 	sudo docker run --rm -it \
@@ -24,3 +28,6 @@ rm:
 
 tag-latest:
 	sudo docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):latest
+
+push-latest:
+	sudo docker push $(IMAGENAME):latest
