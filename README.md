@@ -20,24 +20,24 @@ top-level of the repository (the _build_ rule is optional and can be omitted):
 make -C <DIR> build
 ```
 
-For example, to build the `miking:<ver>-alpine` image, run make on its
-directory:
+For example, to build the `mikinglang/miking:<ver>-alpine` image, run make on
+its directory:
 
 ```sh
 make -C miking-alpine build
 ```
 
-This will also create the `miking:latest-alpine` tag for the created image. To
-tag an image as the latest miking image, use the `tag-latest` makefile rule.
-For example:
+This will also create the `mikinglang/miking:latest-alpine` tag for the created
+image. To tag an image as the latest miking image, use the `tag-latest`
+makefile rule. For example:
 
 ```sh
 make -C miking-alpine tag-latest
 ```
 
-This will create the tagged image `miking:latest`. This allows the instatiation
-of a container with the short-hand `miking` image name instead of writing the
-specific version.
+This will create the tagged image `mikinglang/miking:latest`. This allows the
+instatiation of a container with the short-hand `mikinglang/miking` image name
+instead of writing the specific version.
 
 # Running the Image
 
@@ -49,7 +49,7 @@ _test_ directory contains a _sample.mc_ program to test with.
 Run the following command:
 
 ```sh
-sudo docker run --rm -it -v $(pwd)/test:/mnt:ro miking:<ver> mi eval /mnt/sample.mc
+sudo docker run --rm -it -v $(pwd)/test:/mnt:ro mikinglang/miking:<ver> mi eval /mnt/sample.mc
 ```
 
 This should produce the following output:
@@ -71,7 +71,7 @@ compatible binary.
 Run the following command to compile and run it:
 
 ```sh
-sudo docker run --rm -it -v $(pwd)/test:/mnt:ro miking:<ver> bash -c "mi compile /mnt/sample.mc --output /tmp/sample && /tmp/sample"
+sudo docker run --rm -it -v $(pwd)/test:/mnt:ro mikinglang/miking:<ver> bash -c "mi compile /mnt/sample.mc --output /tmp/sample && /tmp/sample"
 ```
 
 This should produce the same output as for the evaluation case above. To export

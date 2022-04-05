@@ -18,27 +18,22 @@ RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 # Install dependencies available through apk
 RUN apk add opam make m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev
 
-# Initialize opam
-RUN opam init --disable-sandboxing --auto-setup
-
-# Create the 4.12 environment
-RUN opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default
-
-# Install ocaml packages
-RUN opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.20.1
+# NOTE: Running the opam setup as a single step to contain the downloading and
+#       cleaning of unwanted files in the same layer.
+# 1. Initialize opam
+RUN opam init --disable-sandboxing --auto-setup \
+# 2. Create the 4.12 environment
+ && opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default \
+# 3. Install ocaml packages
+ && opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.20.1 \
+# 4. Clean up stuff we no longer need
+ && opam clean -rca \
+ && rm -rf /root/.opam/repo           \
+           /root/.opam/download-cache \
+           /root/.opam/default
 
 # Add the opam environment as default
 RUN echo "eval \$(opam env)" >> /root/.bashrc
-
-# Download the latest version of the miking repository
-RUN mkdir /src && cd /src && git clone https://github.com/miking-lang/miking
-
-WORKDIR /src/miking
-
-# Use the following commit as baseline
-RUN git checkout 707a8a6dab95abca5a5f73c22960e1cdac39742a
-
-RUN eval $(opam env) && make install
 
 WORKDIR /root
 
@@ -49,4 +44,4 @@ ENV OPAM_SWITCH_PREFIX="/root/.opam/4.12.0+domains"
 ENV CAML_LD_LIBRARY_PATH="/root/.opam/4.12.0+domains/lib/stublibs:/root/.opam/4.12.0+domains/lib/ocaml/stublibs:/root/.opam/4.12.0+domains/lib/ocaml"
 ENV OCAML_TOPLEVEL_PATH="/root/.opam/4.12.0+domains/lib/toplevel"
 
-CMD ["mi"]
+CMD ["bash"]

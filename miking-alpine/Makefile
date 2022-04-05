@@ -1,4 +1,5 @@
 # Setup distinction variables
 VERSION_SUFFIX=alpine
+DOCKERFILE=../Dockerfile-generic
 
-include ../miking-common.mk
+include ../defs-miking.mk

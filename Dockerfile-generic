@@ -1,0 +1,16 @@
+ARG BASELINE_IMAGE
+FROM ${BASELINE_IMAGE}
+
+# Download the latest version of the miking repository
+RUN mkdir -p /src && cd /src && git clone https://github.com/miking-lang/miking
+
+WORKDIR /src/miking
+
+ARG MIKING_COMMIT
+RUN git checkout ${MIKING_COMMIT}
+
+RUN eval $(opam env) && make install
+
+WORKDIR /root
+
+CMD ["mi"]
