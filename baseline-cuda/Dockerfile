@@ -15,9 +15,13 @@ RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 # Install dependencies and opam
 RUN DEBIAN_FRONTEND=noninteractive apt-get update \
  && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
- && apt-get install -y curl time unzip git rsync m4 mercurial libopenblas-dev liblapacke-dev pkg-config zlib1g-dev \
+ && apt-get install -y curl time unzip git rsync m4 mercurial nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.1.2/opam-2.1.2-x86_64-linux \
  && chmod +x /usr/local/bin/opam
+
+ENV OWL_CFLAGS="-g -O3 -Ofast -mfpmath=sse -funroll-loops -ffast-math -DSFMT_MEXP=19937 -msse2 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare"
+ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
+ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.

@@ -9,7 +9,7 @@ WORKDIR /src/miking
 ARG MIKING_COMMIT
 RUN git checkout ${MIKING_COMMIT}
 
-RUN eval $(opam env) && make install
+RUN eval $(opam env) && make install test-all clean
 
 WORKDIR /root
 
