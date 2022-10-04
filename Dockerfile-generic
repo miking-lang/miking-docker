@@ -9,6 +9,10 @@ WORKDIR /src/miking
 ARG MIKING_COMMIT
 RUN git checkout ${MIKING_COMMIT}
 
+# Apply patches
+ADD patches/ /src/patches/
+RUN patch -u test/js/make.sh < /src/patches/0001-*.patch
+
 RUN eval $(opam env) && make install test-all clean
 
 WORKDIR /root

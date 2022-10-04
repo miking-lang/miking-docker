@@ -31,9 +31,10 @@ push:
 
 run:
 	docker run --rm -it \
-	           --name $(IMAGENAME) \
-	           --hostname $(IMAGENAME) \
-	           $(IMAGENAME):$(VERSION)
+	           --name miking \
+	           --hostname miking \
+	           $(IMAGENAME):$(VERSION) \
+	           bash
 
 tag-latest:
 	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):latest
