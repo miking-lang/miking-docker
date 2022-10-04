@@ -12,10 +12,12 @@ RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # (ls with color is already enables on ubuntu)
 
-# Install dependencies and opam
-RUN DEBIAN_FRONTEND=noninteractive apt-get update \
+# Install dependencies and opam (also need to add the Nvidia key)
+RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
+ && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \
+ && apt-get update \
  && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
- && apt-get install -y curl time unzip git rsync m4 mercurial nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev \
+ && apt-get install -y curl time unzip git rsync m4 mercurial nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 libpython3-dev \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.1.2/opam-2.1.2-x86_64-linux \
  && chmod +x /usr/local/bin/opam
 
