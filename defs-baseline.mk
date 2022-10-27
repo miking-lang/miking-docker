@@ -1,4 +1,4 @@
-.PHONY: build rm
+.PHONY: build rmi
 
 # Imports the following variables:
 #  - BASELINE_IMAGENAME
@@ -15,5 +15,5 @@ build:
 	             --file Dockerfile \
 	             ..
 
-rm:
+rmi:
 	docker rmi $(IMAGENAME):$(VERSION)
