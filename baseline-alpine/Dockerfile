@@ -1,4 +1,4 @@
-FROM alpine:3.15.0
+FROM alpine:3.16.2
 
 RUN apk add bash
 
@@ -16,7 +16,11 @@ RUN echo "alias ls='ls --color=auto'" >> /root/.bashrc
 RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies available through apk
-RUN apk add opam make m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev
+RUN apk add opam make m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev lapack-dev nodejs-current
+
+ENV OWL_CFLAGS="-g -O3 -Ofast -mfpmath=sse -funroll-loops -ffast-math -DSFMT_MEXP=19937 -msse2 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare"
+ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
+ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
@@ -25,7 +29,7 @@ RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 4.12 environment
  && opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default \
 # 3. Install ocaml packages
- && opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.20.1 \
+ && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.20.1 \
 # 4. Clean up stuff we no longer need
  && opam clean -rca \
  && rm -rf /root/.opam/repo           \

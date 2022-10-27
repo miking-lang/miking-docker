@@ -1,4 +1,4 @@
-.PHONY: build run tag-latest rm rm-latest-version rm-latest rm-all
+.PHONY: build run tag-latest rmi rmi-latest-version rmi-latest rmi-all
 
 # Imports the following variables:
 #  - LATEST_VERSION
@@ -31,9 +31,10 @@ push:
 
 run:
 	docker run --rm -it \
-	           --name $(IMAGENAME) \
-	           --hostname $(IMAGENAME) \
-	           $(IMAGENAME):$(VERSION)
+	           --name miking \
+	           --hostname miking \
+	           $(IMAGENAME):$(VERSION) \
+	           bash
 
 tag-latest:
 	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):latest
@@ -41,13 +42,13 @@ tag-latest:
 push-latest:
 	docker push $(IMAGENAME):latest
 
-rm:
+rmi:
 	docker rmi $(IMAGENAME):$(VERSION)
 
-rm-latest-version:
+rmi-latest-version:
 	docker rmi $(IMAGENAME):$(LATEST_VERSION)
 
-rm-latest:
+rmi-latest:
 	docker rmi $(IMAGENAME):latest
 
-rm-all: rm rm-latest-version rm-latest
+rmi-all: rmi rmi-latest-version rmi-latest
