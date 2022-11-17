@@ -44,7 +44,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default \
 # 3. Install ocaml packages
  && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.20.1 \
-# 4. Install sundialsml
+# 4. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
  && cd /src/sundialsml \
