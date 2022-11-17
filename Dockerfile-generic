@@ -14,7 +14,7 @@ RUN git checkout ${MIKING_COMMIT}
 # Historic patch for javascript test case
 # RUN patch -u test/js/make.sh < /src/patches/0001-*.patch
 
-RUN eval $(opam env) && make install test-all clean
+RUN eval $(opam env) && make install test-all test-sundials clean
 
 WORKDIR /root
 
