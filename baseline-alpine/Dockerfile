@@ -16,7 +16,21 @@ RUN echo "alias ls='ls --color=auto'" >> /root/.bashrc
 RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies available through apk
-RUN apk add opam make m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev lapack-dev nodejs-current
+RUN apk add opam make cmake m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev lapack-dev nodejs-current
+
+# Install sundials manually
+RUN mkdir -p /src/sundials \
+ && cd /src/sundials \
+ && wget https://github.com/LLNL/sundials/releases/download/v6.1.1/sundials-6.1.1.tar.gz \
+ && tar -xzvf sundials-6.1.1.tar.gz \
+ && cd sundials-6.1.1 \
+ && mkdir build \
+ && cd build \
+ && cmake .. \
+ && make \
+ && make install \
+ && cd /src \
+ && rm -rf sundials
 
 ENV OWL_CFLAGS="-g -O3 -Ofast -mfpmath=sse -funroll-loops -ffast-math -DSFMT_MEXP=19937 -msse2 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare"
 ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
@@ -30,11 +44,24 @@ RUN opam init --disable-sandboxing --auto-setup \
  && opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default \
 # 3. Install ocaml packages
  && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.20.1 \
-# 4. Clean up stuff we no longer need
+# 4. Install sundialsml manually (to ensure correct version)
+ && eval $(opam env) \
+ && mkdir -p /src/sundialsml \
+ && cd /src/sundialsml \
+ && wget https://github.com/inria-parkas/sundialsml/archive/refs/tags/v6.1.1p1.zip \
+ && unzip v6.1.1p1.zip \
+ && cd sundialsml-6.1.1p1 \
+ && ./configure \
+ && make \
+ && make install \
+ && cd /src \
+ && rm -rf sundialsml \
+# 5. Clean up stuff we no longer need
  && opam clean -rca \
  && rm -rf /root/.opam/repo           \
            /root/.opam/download-cache \
            /root/.opam/default
+
 
 # Add the opam environment as default
 RUN echo "eval \$(opam env)" >> /root/.bashrc
