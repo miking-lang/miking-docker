@@ -17,6 +17,9 @@ VERSION=$(MIKING_IMAGEVERSION)
 #  - DOCKERFILE
 
 build:
+	@echo -e "\033[1;31mSpecify the platform you are building for with \033[1;37mmake build/<arch>\033[0m"
+
+build/%:
 	docker build --tag $(IMAGENAME):$(VERSION) \
 	             --force-rm \
 	             --build-arg "BASELINE_IMAGE=$(BASELINE_IMAGENAME):$(BASELINE_IMAGEVERSION)" \

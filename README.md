@@ -25,10 +25,10 @@ the host system.
 
 The images are configured to be built via makefiles. Build the image with its
 Dockerfile in the directory `<DIR>` by running the following in at the
-top-level of the repository (the _build_ rule is optional and can be omitted):
+top-level of the repository (replacing `<arch>` by either amd64 or arm64):
 
 ```sh
-make -C <DIR> build
+make -C <DIR> build/<arch>
 ```
 
 Each miking image is based on a baseline image. **Before building a miking
@@ -39,7 +39,7 @@ For example, before building the `miking-alpine` image, the matching
 directory:
 
 ```sh
-make -C baseline-alpine build
+make -C baseline-alpine build/<arch>
 ```
 
 This will create baseline image `mikinglang/baseline:<basever>-alpine` which
@@ -48,7 +48,7 @@ the compiler itself. After the baseline image has been built, the
 `miking-alpine` image can now be built by running make on its directory:
 
 ```sh
-make -C miking-alpine build
+make -C miking-alpine build/<arch>
 ```
 
 This will create the versioned image `mikinglang/miking:<miver>-alpine` as well
