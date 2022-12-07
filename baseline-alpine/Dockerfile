@@ -36,8 +36,8 @@ ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 #       cleaning of unwanted files in the same layer.
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
-# 2. Create the 4.12 environment
- && opam switch create ocaml5-beta ocaml-variants.5.0.0~beta2+options \
+# 2. Create the 5.0.0~rc1 environment
+ && opam switch create 5.0.0~rc1 \
 # 3. Install ocaml packages
  && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
 # 4. Install sundialsml manually (to ensure correct version)
@@ -65,10 +65,10 @@ RUN echo "eval \$(opam env)" >> /root/.bashrc
 WORKDIR /root
 
 # Export the opam env contents to docker ENV
-ENV PATH="/root/.opam/ocaml5-beta/bin:/root/.local/bin:$PATH"
-ENV MANPATH=":/root/.opam/ocaml5-beta/man"
-ENV OPAM_SWITCH_PREFIX="/root/.opam/ocaml5-beta"
-ENV CAML_LD_LIBRARY_PATH="/root/.opam/ocaml5-beta/lib/stublibs:/root/.opam/ocaml5-beta/lib/ocaml/stublibs:/root/.opam/ocaml5-beta/lib/ocaml"
-ENV OCAML_TOPLEVEL_PATH="/root/.opam/ocaml5-beta/lib/toplevel"
+ENV PATH="/root/.opam/5.0.0~rc1/bin:/root/.local/bin:$PATH"
+ENV MANPATH=":/root/.opam/5.0.0~rc1/man"
+ENV OPAM_SWITCH_PREFIX="/root/.opam/5.0.0~rc1"
+ENV CAML_LD_LIBRARY_PATH="/root/.opam/5.0.0~rc1/lib/stublibs:/root/.opam/5.0.0~rc1/lib/ocaml/stublibs:/root/.opam/5.0.0~rc1/lib/ocaml"
+ENV OCAML_TOPLEVEL_PATH="/root/.opam/5.0.0~rc1/lib/toplevel"
 
 CMD ["bash"]
