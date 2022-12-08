@@ -72,11 +72,13 @@ if __name__ == "__main__":
     if args.arch is not None and blob["Architecture"] != args.arch:
         perror(f"Architecture assertion failed. Expected \"{args.arch}\", got \"{blob['Architecture']}\"")
 
+    # This is just for information, so relax the correctness a bit... (assertions should be done above)
     funcs = [print_tag, print_arch, print_env]
     for f in funcs:
         try:
             f(blob)
         except Exception as e:
-            print(e)
+            msg = f"{type(e).__name__} exception in {f.__name__}: {str(e)}"
+            perror(msg, code=None)
     #for key, val in blob.items():
     #    pprop(key, val)
