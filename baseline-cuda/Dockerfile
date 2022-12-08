@@ -1,3 +1,5 @@
+ARG PLATFORM_OWL_CFLAGS
+
 FROM nvidia/cuda:11.4.3-devel-ubuntu20.04
 
 SHELL ["/bin/bash", "-c"]
@@ -35,7 +37,7 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
-ENV OWL_CFLAGS="-g -O3 -Ofast -mfpmath=sse -funroll-loops -ffast-math -DSFMT_MEXP=19937 -msse2 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare"
+ENV OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare ${PLATFORM_OWL_CFLAGS}"
 ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
 ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 
@@ -44,7 +46,7 @@ ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0~rc1 environment
- && opam switch create 5.0.0~rc1 \
+ && opam switch create miking-ocaml 5.0.0~rc1 \
 # 3. Install ocaml packages
  && opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
 # 4. Install sundialsml manually (to ensure correct version)
@@ -91,12 +93,12 @@ WORKDIR /root
 ENV MIKING_HAS_FEATURE_ACCELERATE="1"
 
 # Export the opam env contents to docker ENV
-ENV PATH="/root/.opam/5.0.0~rc1/bin:/root/.local/bin:$PATH"
-ENV MANPATH="$MANPATH:/root/.opam/5.0.0~rc1/man"
-ENV OPAM_SWITCH_PREFIX="/root/.opam/5.0.0~rc1"
-ENV CAML_LD_LIBRARY_PATH="/root/.opam/5.0.0~rc1/lib/stublibs:/root/.opam/5.0.0~rc1/lib/ocaml/stublibs:/root/.opam/5.0.0~rc1/lib/ocaml"
-ENV OCAML_TOPLEVEL_PATH="/root/.opam/5.0.0~rc1/lib/toplevel"
-ENV PKG_CONFIG_PATH="/root/.opam/5.0.0~rc1/lib/pkgconfig"
+ENV PATH="/root/.opam/miking-ocaml/bin:/root/.local/bin:$PATH"
+ENV MANPATH="$MANPATH:/root/.opam/miking-ocaml/man"
+ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
+ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
+ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
+ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
 
 # For some reason this environment variable is wrongly configured in the source image...
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/lib:$LD_LIBRARY_PATH"

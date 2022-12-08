@@ -38,7 +38,7 @@ ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0~rc1 environment
- && opam switch create 5.0.0~rc1 \
+ && opam switch create miking-ocaml 5.0.0~rc1 \
 # 3. Install ocaml packages
  && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
 # 4. Install sundialsml manually (to ensure correct version)
@@ -66,10 +66,10 @@ RUN echo "eval \$(opam env)" >> /root/.bashrc
 WORKDIR /root
 
 # Export the opam env contents to docker ENV
-ENV PATH="/root/.opam/5.0.0~rc1/bin:/root/.local/bin:$PATH"
-ENV MANPATH=":/root/.opam/5.0.0~rc1/man"
-ENV OPAM_SWITCH_PREFIX="/root/.opam/5.0.0~rc1"
-ENV CAML_LD_LIBRARY_PATH="/root/.opam/5.0.0~rc1/lib/stublibs:/root/.opam/5.0.0~rc1/lib/ocaml/stublibs:/root/.opam/5.0.0~rc1/lib/ocaml"
-ENV OCAML_TOPLEVEL_PATH="/root/.opam/5.0.0~rc1/lib/toplevel"
+ENV PATH="/root/.opam/miking-ocaml/bin:/root/.local/bin:$PATH"
+ENV MANPATH=":/root/.opam/miking-ocaml/man"
+ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
+ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
+ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 
 CMD ["bash"]

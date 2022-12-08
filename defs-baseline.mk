@@ -3,20 +3,25 @@
 # Imports the following variables:
 #  - BASELINE_IMAGENAME
 #  - BASELINE_IMAGEVERSION
+#  - BUILD_LOGDIR
 include ../defs-common.mk
 # NOTE: The ../ is because this file is imported from a child directory
 
 IMAGENAME=$(BASELINE_IMAGENAME)
 VERSION=$(BASELINE_IMAGEVERSION)
 
+VALIDATE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
+
 build:
 	@echo -e "\033[1;31mSpecify the platform you are building for with \033[1;37mmake build/<arch>\033[0m"
 
 build/%:
-	@if [[ ! ("$*" == "arm64" || "$*" == "amd64") ]]; then   \
-	     echo -e "\033[1;31mInvalid platform \"$*\"\033[0m"; \
-	     exit 1;                                             \
-	 fi
+	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
+	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
+	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+baseline_%Y-%m-%d_%H.%M.%S.log"))
+	mkdir -p $(BUILD_LOGDIR)
+	chown $(UID):$(GID) $(BUILD_LOGDIR)
+
 	$(eval PLATFORM_OWL_CFLAGS := $(shell \
 	  if [[ "$*" == "amd64" ]]; then      \
 	    echo "-mfpmath=sse -msse2";       \
@@ -26,9 +31,15 @@ build/%:
 	 ))
 	docker build --tag $(IMAGENAME):$(VERSION) \
 	             --force-rm \
+	             --progress=plain \
 	             --build-arg "PLATFORM_OWL_CFLAGS=$(PLATFORM_OWL_CFLAGS)" \
 	             --file Dockerfile \
-	             ..
+	             .. 2>&1 | tee $(LOGFILE)
+	chown $(UID):$(GID) $(LOGFILE)
+	$(VALIDATE_SCRIPT) --arch=$*
+
+inspect:
+	$(VALIDATE_SCRIPT)
 
 rmi:
 	docker rmi $(IMAGENAME):$(VERSION)
