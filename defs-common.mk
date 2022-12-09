@@ -6,6 +6,9 @@ LATEST_VERSION=latest-$(VERSION_SUFFIX)
 MIKING_IMAGEVERSION=dev6-$(VERSION_SUFFIX)
 BASELINE_IMAGEVERSION=v4-$(VERSION_SUFFIX)
 
+# The suffix for the version to be tagged with the `latest` alias
+LATEST_ALIAS=latest-alpine
+
 BUILD_LOGDIR=../_logs
 
 #MIKING_GIT_REMOTE="https://github.com/miking-lang/miking.git"

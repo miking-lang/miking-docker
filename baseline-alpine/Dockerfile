@@ -30,6 +30,7 @@ RUN mkdir -p /src/sundials \
 
 ARG PLATFORM_OWL_CFLAGS
 ENV OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare ${PLATFORM_OWL_CFLAGS}"
+ENV OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing"
 ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
 ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 

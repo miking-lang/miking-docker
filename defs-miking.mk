@@ -2,6 +2,7 @@
 
 # Imports the following variables:
 #  - LATEST_VERSION
+#  - LATEST_ALIAS
 #  - MIKING_GIT_REMOTE
 #  - MIKING_GIT_COMMIT
 #  - MIKING_IMAGENAME
@@ -28,7 +29,8 @@ build/%:
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
 	mkdir -p $(BUILD_LOGDIR)
-	chown $(UID):$(GID) $(BUILD_LOGDIR)
+	touch $(LOGFILE)
+	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
 	docker build --tag $(IMAGENAME):$(VERSION) \
 	             --force-rm \
@@ -37,11 +39,13 @@ build/%:
 	             --build-arg "MIKING_GIT_REMOTE=$(MIKING_GIT_REMOTE)" \
 	             --build-arg "MIKING_GIT_COMMIT=$(MIKING_GIT_COMMIT)" \
 	             --file $(DOCKERFILE) \
-	             .. 2>&1 | tee $(LOGFILE)
-	chown $(UID):$(GID) $(LOGFILE)
+	             .. 2>&1 | tee -a $(LOGFILE)
 	$(VALIDATE_SCRIPT) --arch=$*
 
 	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):$(LATEST_VERSION)
+	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
+	    make tag-latest; \
+	fi
 
 inspect:
 	$(VALIDATE_SCRIPT)
@@ -49,6 +53,9 @@ inspect:
 push:
 	docker push $(IMAGENAME):$(VERSION)
 	docker push $(IMAGENAME):$(LATEST_VERSION)
+	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
+	    make push-latest; \
+	fi
 
 run:
 	docker run --rm -it \

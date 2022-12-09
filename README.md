@@ -12,14 +12,9 @@ The following dependencies are needed to build the docker images:
 
 ## CUDA Runtime Dependencies
 
-The miking-cuda image is based on CUDA 11.4. As such, **CUDA with version 11.4
-or greater** is required on the host system in order to run the miking-cuda
-image. See the docker documentation on
-[Runtime options with Memory, CPUs, and GPUs](https://docs.docker.com/config/containers/resource_constraints/#gpu)
-for information on how to set up docker on the host system to work with GPUs.
-
-It is still possible to build the miking-cuda image without CUDA installed on
-the host system.
+See CUDA Runtime Dependencies section in the dockerhub README under `docs/`. It
+is still possible to build the miking-cuda image without CUDA installed on the
+host system.
 
 # Build
 
