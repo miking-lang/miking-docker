@@ -11,9 +11,5 @@ LATEST_ALIAS=latest-alpine
 
 BUILD_LOGDIR=../_logs
 
-#MIKING_GIT_REMOTE="https://github.com/miking-lang/miking.git"
-#MIKING_GIT_COMMIT="f649b2a63572964340ba066bdbab5210259933e8"
-
-# Temporarily use the OCaml 5 branch
-MIKING_GIT_REMOTE="https://github.com/larshum/miking.git"
-MIKING_GIT_COMMIT="9ea937474c4acbe1a5566e2c0af99ddd48281039"
+MIKING_GIT_REMOTE="https://github.com/miking-lang/miking.git"
+MIKING_GIT_COMMIT="6628246936d9323b05175c2ab92f5026c232021c"
