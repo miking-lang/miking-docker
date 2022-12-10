@@ -72,7 +72,7 @@ RUN opam init --disable-sandboxing --auto-setup \
 RUN echo "eval \$(opam env)" >> /root/.bashrc
 
 # Install Futhark
-RUN export PATH="/root/.ghcup/bin:\$PATH" \
+RUN export PATH="/root/.ghcup/bin:$PATH" \
  && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | \
     BOOTSTRAP_HASKELL_NONINTERACTIVE=1 \
     BOOTSTRAP_HASKELL_GHC_VERSION=9.2.5 \
