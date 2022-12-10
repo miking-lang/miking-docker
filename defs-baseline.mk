@@ -11,7 +11,7 @@ IMAGENAME=$(BASELINE_IMAGENAME)
 VERSION=$(BASELINE_IMAGEVERSION)
 
 VALIDATE_IMAGE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
-VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.sh"
+VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.py"
 
 build:
 	@echo -e "\033[1;31mSpecify the platform you are building for with \033[1;37mmake build/<arch>\033[0m"

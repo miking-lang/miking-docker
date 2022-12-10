@@ -17,7 +17,7 @@ IMAGENAME=$(MIKING_IMAGENAME)
 VERSION=$(MIKING_IMAGEVERSION)
 
 VALIDATE_IMAGE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
-VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.sh"
+VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.py"
 
 # The subfolder's makefile shall set the following variables:
 #  - DOCKERFILE
