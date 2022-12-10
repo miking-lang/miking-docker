@@ -1,3 +1,5 @@
+SHELL=bash
+
 BASELINE_IMAGENAME=mikinglang/baseline
 MIKING_IMAGENAME=mikinglang/miking
 
