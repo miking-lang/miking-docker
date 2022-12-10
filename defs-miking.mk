@@ -72,13 +72,6 @@ push-manifests:
 		docker manifest push $(IMAGENAME):latest
 	fi
 
-#push:
-#	docker push $(IMAGENAME):$(VERSION)
-#	docker push $(IMAGENAME):$(LATEST_VERSION)
-#	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
-#	    make push-latest; \
-#	fi
-
 run:
 	docker run --rm -it \
 	           --name miking \
@@ -86,14 +79,8 @@ run:
 	           $(IMAGENAME):$(VERSION) \
 	           bash
 
-#tag-latest:
-#	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):latest
-
-#push-latest:
-#	docker push $(IMAGENAME):latest
-
 rmi:
-	docker rmi $(IMAGENAME):$(VERSION)
+	docker rmi $(IMAGENAME):$(VERSION)-$* $(IMAGENAME):$(VERSION)
 
 rmi-latest-version:
 	docker rmi $(IMAGENAME):$(LATEST_VERSION)
