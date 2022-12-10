@@ -1,4 +1,4 @@
-.PHONY: build run tag-latest rmi rmi-latest-version rmi-latest rmi-all
+.PHONY: build push run rmi rmi-latest-version rmi-latest rmi-all
 
 # Imports the following variables:
 #  - LATEST_VERSION
