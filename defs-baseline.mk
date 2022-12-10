@@ -10,7 +10,8 @@ include ../defs-common.mk
 IMAGENAME=$(BASELINE_IMAGENAME)
 VERSION=$(BASELINE_IMAGEVERSION)
 
-VALIDATE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
+VALIDATE_IMAGE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
+VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.sh"
 
 build:
 	@echo -e "\033[1;31mSpecify the platform you are building for with \033[1;37mmake build/<arch>\033[0m"
@@ -19,6 +20,9 @@ build/%:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+baseline_%Y-%m-%d_%H.%M.%S.log"))
+
+	$(VALIDATE_ARCH_SCRIPT) $*
+
 	mkdir -p $(BUILD_LOGDIR)
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
@@ -36,10 +40,10 @@ build/%:
 	             --build-arg "PLATFORM_OWL_CFLAGS=$(PLATFORM_OWL_CFLAGS)" \
 	             --file Dockerfile \
 	             .. 2>&1 | tee -a $(LOGFILE)
-	$(VALIDATE_SCRIPT) --arch=$*
+	$(VALIDATE_IMAGE_SCRIPT) --arch=$*
 
 inspect:
-	$(VALIDATE_SCRIPT)
+	$(VALIDATE_IMAGE_SCRIPT)
 
 rmi:
 	docker rmi $(IMAGENAME):$(VERSION)

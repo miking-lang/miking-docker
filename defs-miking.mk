@@ -16,7 +16,8 @@ include ../defs-common.mk
 IMAGENAME=$(MIKING_IMAGENAME)
 VERSION=$(MIKING_IMAGEVERSION)
 
-VALIDATE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
+VALIDATE_IMAGE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
+VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.sh"
 
 # The subfolder's makefile shall set the following variables:
 #  - DOCKERFILE
@@ -28,6 +29,9 @@ build/%:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
+
+	$(VALIDATE_ARCH_SCRIPT) $*
+
 	mkdir -p $(BUILD_LOGDIR)
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
@@ -40,7 +44,7 @@ build/%:
 	             --build-arg "MIKING_GIT_COMMIT=$(MIKING_GIT_COMMIT)" \
 	             --file $(DOCKERFILE) \
 	             .. 2>&1 | tee -a $(LOGFILE)
-	$(VALIDATE_SCRIPT) --arch=$*
+	$(VALIDATE_IMAGE_SCRIPT) --arch=$*
 
 	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):$(LATEST_VERSION)
 	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
@@ -48,7 +52,7 @@ build/%:
 	fi
 
 inspect:
-	$(VALIDATE_SCRIPT)
+	$(VALIDATE_IMAGE_SCRIPT)
 
 push:
 	docker push $(IMAGENAME):$(VERSION)
