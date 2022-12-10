@@ -43,7 +43,16 @@ def print_arch(d):
 def print_env(d):
     """Prints the preconfigured environment of the image."""
     pinfo("Pre-configured Environment:")
-    for e in d["ContainerConfig"]["Env"]:
+    conf_env = d.get("Config", {}).get("Env", [])
+    containerconf_env = d.get("ContainerConfig", {}).get("Env", [])
+    if conf_env is None:
+        conf_env = []
+    if containerconf_env is None:
+        containerconf_env = []
+
+    env = conf_env + containerconf_env
+
+    for e in env:
         idx = e.find("=")
         if idx < 0:
             pwarn(f" - Irregular environment def: {e}")
