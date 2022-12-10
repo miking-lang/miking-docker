@@ -6,14 +6,10 @@ SHELL ["/bin/bash", "-c"]
 
 WORKDIR /root
 
-# Add a nice PS1 for bash
-RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc
-
-# Automatically show colors with ls
-RUN echo "alias ls='ls --color=auto'" >> /root/.bashrc
-
-# Where the built mi image will be placed
-RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
+# bashrc setting: PS1, ls format, and new PATH to include mi destination
+RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc \
+ && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
+ && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies available through apk
 RUN apk add opam make cmake m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev lapack-dev nodejs-current
@@ -32,7 +28,9 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
-ENV OWL_CFLAGS="-g -O3 -Ofast -mfpmath=sse -funroll-loops -ffast-math -DSFMT_MEXP=19937 -msse2 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare"
+ARG PLATFORM_OWL_CFLAGS
+ENV OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare ${PLATFORM_OWL_CFLAGS}"
+ENV OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing"
 ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
 ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 
@@ -40,10 +38,10 @@ ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
 #       cleaning of unwanted files in the same layer.
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
-# 2. Create the 4.12 environment
- && opam switch create 4.12.0+domains --packages=ocaml-variants.4.12.0+domains --repositories=multicore=git+https://github.com/ocaml-multicore/multicore-opam.git,default \
+# 2. Create the 5.0.0~rc1 environment
+ && opam switch create miking-ocaml 5.0.0~rc1 \
 # 3. Install ocaml packages
- && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.20.1 \
+ && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
 # 4. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
@@ -69,10 +67,10 @@ RUN echo "eval \$(opam env)" >> /root/.bashrc
 WORKDIR /root
 
 # Export the opam env contents to docker ENV
-ENV PATH="/root/.opam/4.12.0+domains/bin:/root/.local/bin:$PATH"
-ENV MANPATH=":/root/.opam/4.12.0+domains/man"
-ENV OPAM_SWITCH_PREFIX="/root/.opam/4.12.0+domains"
-ENV CAML_LD_LIBRARY_PATH="/root/.opam/4.12.0+domains/lib/stublibs:/root/.opam/4.12.0+domains/lib/ocaml/stublibs:/root/.opam/4.12.0+domains/lib/ocaml"
-ENV OCAML_TOPLEVEL_PATH="/root/.opam/4.12.0+domains/lib/toplevel"
+ENV PATH="/root/.opam/miking-ocaml/bin:/root/.local/bin:$PATH"
+ENV MANPATH=":/root/.opam/miking-ocaml/man"
+ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
+ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
+ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 
 CMD ["bash"]

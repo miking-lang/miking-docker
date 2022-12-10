@@ -12,43 +12,39 @@ The following dependencies are needed to build the docker images:
 
 ## CUDA Runtime Dependencies
 
-The miking-cuda image is based on CUDA 11.4. As such, **CUDA with version 11.4
-or greater** is required on the host system in order to run the miking-cuda
-image. See the docker documentation on
-[Runtime options with Memory, CPUs, and GPUs](https://docs.docker.com/config/containers/resource_constraints/#gpu)
-for information on how to set up docker on the host system to work with GPUs.
-
-It is still possible to build the miking-cuda image without CUDA installed on
-the host system.
+See CUDA Runtime Dependencies section in the dockerhub README under `docs/`. It
+is still possible to build the miking-cuda image without CUDA installed on the
+host system.
 
 # Build
 
 The images are configured to be built via makefiles. Build the image with its
 Dockerfile in the directory `<DIR>` by running the following in at the
-top-level of the repository (the _build_ rule is optional and can be omitted):
+top-level of the repository (replacing `<arch>` by either amd64 or arm64):
 
 ```sh
-make -C <DIR> build
+make -C <DIR> build/<arch>
 ```
 
 Each miking image is based on a baseline image. **Before building a miking
 image, its corresponding baseline image has to be built.**
 
 For example, before building the `miking-alpine` image, the matching
-`baseline-alpine` image has to be built first. Build it by running make on its
-directory:
+`baseline-alpine` image has to be built first. Build it for amd64/x86_64 by
+running make on its directory:
 
 ```sh
-make -C baseline-alpine build
+make -C baseline-alpine build/amd64
 ```
 
 This will create baseline image `mikinglang/baseline:<basever>-alpine` which
 contains all the necessary dependencies to build the miking compiler, but not
-the compiler itself. After the baseline image has been built, the
+the compiler itself. The `<arch>` part is necessary to specify some compiler
+options for certain dependencies. After the baseline image has been built, the
 `miking-alpine` image can now be built by running make on its directory:
 
 ```sh
-make -C miking-alpine build
+make -C miking-alpine build/amd64
 ```
 
 This will create the versioned image `mikinglang/miking:<miver>-alpine` as well
