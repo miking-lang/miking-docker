@@ -68,8 +68,8 @@ push-manifests:
 	docker manifest push $(IMAGENAME):$(VERSION)
 	docker manifest push $(IMAGENAME):$(LATEST_VERSION)
 	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
-		docker manifest create $(IMAGENAME):latest $(AMENDMENTS)
-		docker manifest push $(IMAGENAME):latest
+		docker manifest create $(IMAGENAME):latest $(AMENDMENTS); \
+		docker manifest push $(IMAGENAME):latest; \
 	fi
 
 run:
