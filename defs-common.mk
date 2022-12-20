@@ -15,3 +15,6 @@ BUILD_LOGDIR=../_logs
 
 MIKING_GIT_REMOTE="https://github.com/miking-lang/miking.git"
 MIKING_GIT_COMMIT="6628246936d9323b05175c2ab92f5026c232021c"
+
+VALIDATE_IMAGE_SCRIPT=../scripts/validate_image.py
+VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.py"

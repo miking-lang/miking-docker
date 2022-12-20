@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import subprocess
 import sys
 
 def pprop(key, val, sep=": "): sys.stderr.write(f"\033[1;37m{key}{sep}\033[0;37m{val}\n\033[0m")
@@ -66,13 +67,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser("Validate the output from a docker inspect [image]")
     parser.add_argument("-A", "--arch", dest="arch", metavar="NAME", type=str, default=None,
                         help="Validate the architecture of the produced image.")
+    parser.add_argument("image", type=str,
+                        help="The image to inspect")
     args = parser.parse_args()
 
-    if sys.stdin.isatty():
-        perror("Should not run this script as standalone with a TTY. Make sure that the intented input is piped into stdin.")
+    try:
+        jsonstr = subprocess.check_output(f"docker inspect {args.image}", shell=True)
+    except subprocess.CalledProcessError as e:
+        print(e)
+        sys.exit(e.returncode)
 
     # Output from `docker inspect` should not be more than 10 MB... just a precaution
-    blob = json.load(sys.stdin)
+    blob = json.loads(jsonstr)
     if isinstance(blob, list):
         if len(blob) != 1:
             pwarn(f"Expected exactly one entry in blob, received {len(blob)}")

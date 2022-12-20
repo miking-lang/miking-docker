@@ -1,4 +1,4 @@
-.PHONY: build run tag-latest rmi rmi-latest-version rmi-latest rmi-all
+.PHONY: build push run rmi rmi-latest-version rmi-latest rmi-all
 
 # Imports the following variables:
 #  - LATEST_VERSION
@@ -10,14 +10,13 @@
 #  - BASELINE_IMAGENAME
 #  - BASELINE_IMAGEVERSION
 #  - BUILD_LOGDIR
+#  - VALIDATE_ARCH_SCRIPT
+#  - VALIDATE_IMAGE_SCRIPT
 include ../defs-common.mk
 # NOTE: The ../ is because this file is imported from a child directory
 
 IMAGENAME=$(MIKING_IMAGENAME)
 VERSION=$(MIKING_IMAGEVERSION)
-
-VALIDATE_IMAGE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
-VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.py"
 
 # The subfolder's makefile shall set the following variables:
 #  - DOCKERFILE
@@ -36,29 +35,41 @@ build/%:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	docker build --tag $(IMAGENAME):$(VERSION) \
+	docker build --tag $(IMAGENAME):$(VERSION)-$* \
 	             --force-rm \
 	             --progress=plain \
-	             --build-arg "BASELINE_IMAGE=$(BASELINE_IMAGENAME):$(BASELINE_IMAGEVERSION)" \
+	             --build-arg "TARGETPLATFORM=linux/$*" \
+	             --build-arg "BASELINE_IMAGE=$(BASELINE_IMAGENAME):$(BASELINE_IMAGEVERSION)-$*" \
 	             --build-arg "MIKING_GIT_REMOTE=$(MIKING_GIT_REMOTE)" \
 	             --build-arg "MIKING_GIT_COMMIT=$(MIKING_GIT_COMMIT)" \
 	             --file $(DOCKERFILE) \
 	             .. 2>&1 | tee -a $(LOGFILE)
-	$(VALIDATE_IMAGE_SCRIPT) --arch=$*
-
-	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):$(LATEST_VERSION)
-	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
-	    make tag-latest; \
-	fi
-
-inspect:
-	$(VALIDATE_IMAGE_SCRIPT)
+	$(VALIDATE_IMAGE_SCRIPT) --arch=$* $(IMAGENAME):$(VERSION)-$*
 
 push:
-	docker push $(IMAGENAME):$(VERSION)
-	docker push $(IMAGENAME):$(LATEST_VERSION)
+	@echo -e "\033[1;31mSpecify the platform you are pushing for with \033[1;37mmake push/<arch>\033[0m"
+
+push/%:
+	$(VALIDATE_ARCH_SCRIPT) $*
+	docker push $(IMAGENAME):$(VERSION)-$*
+
+push-manifests:
+	$(eval AMENDMENTS := $(shell \
+	  if [[ "$(VERSION_SUFFIX)" == "alpine" ]]; then \
+	    echo "$(foreach a,amd64 arm64,--amend $(IMAGENAME):$(VERSION)-$a)"; \
+	  else \
+	    echo "--amend $(IMAGENAME):$(VERSION)-amd64"; \
+	  fi   \
+	 ))
+	echo $(AMENDMENTS)
+
+	docker manifest create $(IMAGENAME):$(VERSION) $(AMENDMENTS)
+	docker manifest create $(IMAGENAME):$(LATEST_VERSION) $(AMENDMENTS)
+	docker manifest push $(IMAGENAME):$(VERSION)
+	docker manifest push $(IMAGENAME):$(LATEST_VERSION)
 	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
-	    make push-latest; \
+		docker manifest create $(IMAGENAME):latest $(AMENDMENTS); \
+		docker manifest push $(IMAGENAME):latest; \
 	fi
 
 run:
@@ -68,14 +79,8 @@ run:
 	           $(IMAGENAME):$(VERSION) \
 	           bash
 
-tag-latest:
-	docker tag $(IMAGENAME):$(VERSION) $(IMAGENAME):latest
-
-push-latest:
-	docker push $(IMAGENAME):latest
-
 rmi:
-	docker rmi $(IMAGENAME):$(VERSION)
+	docker rmi $(IMAGENAME):$(VERSION)-$* $(IMAGENAME):$(VERSION)
 
 rmi-latest-version:
 	docker rmi $(IMAGENAME):$(LATEST_VERSION)

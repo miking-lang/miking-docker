@@ -28,21 +28,25 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
-ARG PLATFORM_OWL_CFLAGS
-ENV OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare ${PLATFORM_OWL_CFLAGS}"
-ENV OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing"
-ENV EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math"
-ENV EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math"
-
+ARG TARGETPLATFORM
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0~rc1 environment
  && opam switch create miking-ocaml 5.0.0~rc1 \
-# 3. Install ocaml packages
+# 3. Setup platform compiler specific flags
+ && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
+ && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
+ && export EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math" \
+ && export EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math" \
+ && if [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then \
+        export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
+        echo "$OWL_CFLAGS" > /root/owlflags.txt; \
+    fi \
+# 4. Install ocaml packages
  && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
-# 4. Install sundialsml manually (to ensure correct version)
+# 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
  && cd /src/sundialsml \
@@ -54,7 +58,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && make install \
  && cd /src \
  && rm -rf sundialsml \
-# 5. Clean up stuff we no longer need
+# 6. Clean up stuff we no longer need
  && opam clean -rca \
  && rm -rf /root/.opam/repo           \
            /root/.opam/download-cache \

@@ -4,14 +4,13 @@
 #  - BASELINE_IMAGENAME
 #  - BASELINE_IMAGEVERSION
 #  - BUILD_LOGDIR
+#  - VALIDATE_ARCH_SCRIPT
+#  - VALIDATE_IMAGE_SCRIPT
 include ../defs-common.mk
 # NOTE: The ../ is because this file is imported from a child directory
 
 IMAGENAME=$(BASELINE_IMAGENAME)
 VERSION=$(BASELINE_IMAGEVERSION)
-
-VALIDATE_IMAGE_SCRIPT=docker inspect "$(IMAGENAME):$(VERSION)" | ../scripts/validate_image.py
-VALIDATE_ARCH_SCRIPT="../scripts/validate_architecture.py"
 
 build:
 	@echo -e "\033[1;31mSpecify the platform you are building for with \033[1;37mmake build/<arch>\033[0m"
@@ -27,23 +26,13 @@ build/%:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	$(eval PLATFORM_OWL_CFLAGS := $(shell \
-	  if [[ "$*" == "amd64" ]]; then      \
-	    echo "-mfpmath=sse -msse2";       \
-	  else                                \
-	    echo "";                          \
-	  fi                                  \
-	 ))
-	docker build --tag $(IMAGENAME):$(VERSION) \
+	docker build --tag $(IMAGENAME):$(VERSION)-$* \
 	             --force-rm \
 	             --progress=plain \
-	             --build-arg "PLATFORM_OWL_CFLAGS=$(PLATFORM_OWL_CFLAGS)" \
+	             --build-arg "TARGETPLATFORM=linux/$*" \
 	             --file Dockerfile \
 	             .. 2>&1 | tee -a $(LOGFILE)
-	$(VALIDATE_IMAGE_SCRIPT) --arch=$*
-
-inspect:
-	$(VALIDATE_IMAGE_SCRIPT)
+	$(VALIDATE_IMAGE_SCRIPT) --arch=$* $(IMAGENAME):$(VERSION)-$*
 
 rmi:
 	docker rmi $(IMAGENAME):$(VERSION)
