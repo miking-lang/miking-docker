@@ -9,8 +9,8 @@ RUN mkdir -p /src \
  && git clone ${MIKING_GIT_REMOTE} \
  && cd /src/miking \
  && git checkout ${MIKING_GIT_COMMIT} \
- && echo "MIKING_GIT_REMOTE=$MIKING_GIT_REMOTE" >> /root/imgbuild_flags.txt \
- && echo "MIKING_GIT_COMMIT=$MIKING_GIT_COMMIT" >> /root/imgbuild_flags.txt
+ && echo "MIKING_GIT_REMOTE=\"$MIKING_GIT_REMOTE\"" >> /root/imgbuild_flags.txt \
+ && echo "MIKING_GIT_COMMIT=\"$MIKING_GIT_COMMIT\"" >> /root/imgbuild_flags.txt
 
 WORKDIR /src/miking
 

@@ -43,10 +43,10 @@ RUN opam init --disable-sandboxing --auto-setup \
  && if [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then \
         export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
     fi \
- && echo "OWL_CFLAGS=$OWL_CFLAGS" >> /root/imgbuild_flags.txt \
- && echo "OWL_AEOS_CFLAGS=$OWL_AEOS_CFLAGS" >> /root/imgbuild_flags.txt \
- && echo "EIGENCPP_OPTFLAGS=$EIGENCPP_OPTFLAGS" >> /root/imgbuild_flags.txt \
- && echo "EIGEN_FLAGS=$EIGEN_FLAGS" >> /root/imgbuild_flags.txt \
+ && echo "OWL_CFLAGS=\"$OWL_CFLAGS\"" >> /root/imgbuild_flags.txt \
+ && echo "OWL_AEOS_CFLAGS=\"$OWL_AEOS_CFLAGS\"" >> /root/imgbuild_flags.txt \
+ && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
+ && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
  && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
