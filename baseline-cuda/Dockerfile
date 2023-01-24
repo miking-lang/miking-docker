@@ -43,7 +43,7 @@ ARG TARGETPLATFORM
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0~rc1 environment
- && opam switch create miking-ocaml 5.0.0~rc1 \
+ && opam switch create miking-ocaml 5.0.0 \
 # 3. Setup platform compiler specific flags
  && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
  && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
@@ -51,8 +51,11 @@ RUN opam init --disable-sandboxing --auto-setup \
  && export EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math" \
  && if [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then \
         export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
-        echo "$OWL_CFLAGS" > /root/owlflags.txt; \
     fi \
+ && echo "OWL_CFLAGS=\"$OWL_CFLAGS\"" >> /root/imgbuild_flags.txt \
+ && echo "OWL_AEOS_CFLAGS=\"$OWL_AEOS_CFLAGS\"" >> /root/imgbuild_flags.txt \
+ && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
+ && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
  && opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)

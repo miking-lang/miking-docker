@@ -73,10 +73,13 @@ push-manifests:
 	fi
 
 run:
+	@echo -e "\033[1;31mSpecify the platform you are running on with \033[1;37mmake run/<arch>\033[0m"
+
+run/%:
 	docker run --rm -it \
 	           --name miking \
 	           --hostname miking \
-	           $(IMAGENAME):$(VERSION) \
+	           $(IMAGENAME):$(VERSION)-$* \
 	           bash
 
 rmi:

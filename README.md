@@ -47,18 +47,33 @@ options for certain dependencies. After the baseline image has been built, the
 make -C miking-alpine build/amd64
 ```
 
-This will create the versioned image `mikinglang/miking:<miver>-alpine` as well
-as the `mikinglang/miking:latest-alpine` tag for the created image. To tag an
-image as _the_ latest miking image, use the `tag-latest` makefile rule. For
-example:
+This will create the versioned image `mikinglang/miking:<miver>-alpine`. This
+image can then be used directly, or pushed up to Docker Hub. To push it up to
+Docker Hub, make sure that you have push access to the mikinglang repository
+and then run the make rule (replace `amd64` with the architecture of your
+platform):
 
 ```sh
-make -C miking-alpine tag-latest
+make -C miking-alpine push/amd64
 ```
 
-This will create the tagged image `mikinglang/miking:latest`. This allows the
-instatiation of a container with the short-hand `mikinglang/miking` image name
-instead of writing the specific version.
+Each image should be built for the following architectures:
+
+ * miking-alpine: `amd64`, `arm64`
+ * miking-cuda: `amd64`
+
+Once all architectures have been built and pushed for an image, push the
+manifests to Docker Hub by the following make rule:
+
+```sh
+make -C miking-alpine push-manifests
+```
+
+This will make the `mikinglang/miking:latest-alpine` tag available on Docker
+Hub. In the case of `make -C miking-cuda push-manifests`, the
+`mikinglang/miking:latest-cuda` tag would be available on Docker Hub. If image
+marked as the `LATEST_ALIAS` has its manifest pushed, then the
+`mikinglang/miking:latest` tag would also be available on Docker Hub.
 
 # Running the Image
 
