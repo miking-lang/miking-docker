@@ -63,13 +63,17 @@ push-manifests:
 	 ))
 	echo $(AMENDMENTS)
 
+	# Using the || true since there is no -f option to `manifest rm`
+	docker manifest rm $(IMAGENAME):$(VERSION) || true
+	docker manifest rm $(IMAGENAME):$(LATEST_VERSION) || true
 	docker manifest create $(IMAGENAME):$(VERSION) $(AMENDMENTS)
 	docker manifest create $(IMAGENAME):$(LATEST_VERSION) $(AMENDMENTS)
-	docker manifest push $(IMAGENAME):$(VERSION)
-	docker manifest push $(IMAGENAME):$(LATEST_VERSION)
+	docker manifest push --purge $(IMAGENAME):$(VERSION)
+	docker manifest push --purge $(IMAGENAME):$(LATEST_VERSION)
 	if [[ "$(LATEST_VERSION)" == "$(LATEST_ALIAS)" ]]; then \
+		docker manifest rm $(IMAGENAME):latest || true; \
 		docker manifest create $(IMAGENAME):latest $(AMENDMENTS); \
-		docker manifest push $(IMAGENAME):latest; \
+		docker manifest push --purge $(IMAGENAME):latest; \
 	fi
 
 run:
