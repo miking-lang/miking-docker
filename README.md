@@ -2,11 +2,15 @@
 Docker Environment for compiling and running miking/mcore programs. Each kind
 of image is placed under its own directory.
 
+This readme contains development and build instructions only. For usage
+instructions, see the [Docker Hub README](docs/dockerhub-README.md) file in the
+`docs/` directory.
+
 ## Build Dependencies
 
 The following dependencies are needed to build the docker images:
 
-* `docker` (with a running deamon in the background)
+* `docker` (with a running Docker deamon in the background)
 * `make`
 * `sudo`
 
@@ -15,6 +19,14 @@ The following dependencies are needed to build the docker images:
 See CUDA Runtime Dependencies section in the dockerhub README under `docs/`. It
 is still possible to build the miking-cuda image without CUDA installed on the
 host system.
+
+# Table of Contents
+
+ * [Build](#build)
+ * [Running the Image](#running-the-image)
+   * [Verify Compilation](#verify-compilation)
+ * [Contributing](#contributing)
+   * [Pull Requests](#pull-requests)
 
 # Build
 
@@ -115,3 +127,32 @@ the compiled binary out from the container, either mount the /mnt folder
 without the ":ro" part or mount another folder that is writable from the
 container. Then change the `--output` flag to point to that directory instead
 of the /tmp directory.
+
+# Contributing
+
+To contribute to this repository, fork it, add your changes to a branch on your
+fork, submit your changes as a pull request from that branch.
+
+## Pull Requests
+
+Each pull request shall contain a record of all the targets that builds have
+been validated for. Copy paste this checklist to your PR description:
+
+```
+**Validated builds:**
+
+- [ ] miking-alpine (amd64 / x86_64)
+- [ ] miking-alpine (arm64 / M1 Mac)
+- [ ] miking-cuda (amd64 / x86_64)
+```
+
+It should look like this when formatted by GitHub:
+
+**Validated builds:**
+
+- [ ] miking-alpine (amd64 / x86_64)
+- [ ] miking-alpine (arm64 / M1 Mac)
+- [ ] miking-cuda (amd64 / x86_64)
+
+Tick each box once the build is validated. A build is validated when the miking
+image successfully builds with all tests passing.
