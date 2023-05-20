@@ -19,7 +19,7 @@ RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
  && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \
  && apt-get update \
  && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
- && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 libpython3-dev libtinfo-dev libgmp-dev build-essential curl libffi-dev libffi7 libgmp-dev libgmp10 libncurses-dev libncurses5 libtinfo5 \
+ && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 libpython3-dev libtinfo-dev libgmp-dev build-essential curl libffi-dev libffi7 libgmp-dev libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.1.2/opam-2.1.2-x86_64-linux \
  && chmod +x /usr/local/bin/opam
 

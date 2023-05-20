@@ -12,7 +12,7 @@ RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\03
  && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies available through apk
-RUN apk add opam make cmake m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev lapack-dev nodejs-current
+RUN apk add opam make cmake m4 bubblewrap git rsync mercurial gcc g++ curl libexecinfo-dev linux-headers zlib-dev openblas-dev lapack-dev nodejs-current openjdk17
 
 # Install sundials manually
 RUN mkdir -p /src/sundials \
