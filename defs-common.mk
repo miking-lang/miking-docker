@@ -5,7 +5,7 @@ MIKING_IMAGENAME=mikinglang/miking
 
 # NOTE: VERSION_SUFFIX to be set in subfolders' Makefile
 LATEST_VERSION=latest-$(VERSION_SUFFIX)
-MIKING_IMAGEVERSION=dev9-$(VERSION_SUFFIX)
+MIKING_IMAGEVERSION=dev10-$(VERSION_SUFFIX)
 BASELINE_IMAGEVERSION=v6-$(VERSION_SUFFIX)
 
 # The suffix for the version to be tagged with the `latest` alias
