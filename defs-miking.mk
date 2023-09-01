@@ -51,7 +51,7 @@ test-gpu/%:
 	           --name miking-test-gpu \
 	           --hostname miking-test-gpu \
 	           $(IMAGENAME):$(VERSION)-$* \
-               make -C /src/miking install test-accelerate
+	           make -C /src/miking install test-accelerate
 
 push:
 	@echo -e "\033[1;31mSpecify the platform you are pushing for with \033[1;37mmake push/<arch>\033[0m"
