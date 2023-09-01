@@ -112,6 +112,9 @@ ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
 # For some reason this environment variable is wrongly configured in the source image...
 ENV LD_LIBRARY_PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/lib:$LD_LIBRARY_PATH"
 
+# Add CPATH to allow GCC to access the CUDA includes
+ENV CPATH="/usr/local/cuda/include"
+
 # The ld linker also does not play nice with LD_LIBRARY_PATH, create some
 # symbolic links for the libraries:
 RUN mkdir -p /usr/local/lib64 \

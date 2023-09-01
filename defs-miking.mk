@@ -46,6 +46,13 @@ build/%:
 	             .. 2>&1 | tee -a $(LOGFILE)
 	$(VALIDATE_IMAGE_SCRIPT) --arch=$* $(IMAGENAME):$(VERSION)-$*
 
+test-gpu/%:
+	docker run --rm -it --gpus all \
+	           --name miking-test-gpu \
+	           --hostname miking-test-gpu \
+	           $(IMAGENAME):$(VERSION)-$* \
+               make -C /src/miking install test-accelerate
+
 push:
 	@echo -e "\033[1;31mSpecify the platform you are pushing for with \033[1;37mmake push/<arch>\033[0m"
 
