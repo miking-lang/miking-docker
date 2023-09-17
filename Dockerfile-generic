@@ -19,7 +19,11 @@ WORKDIR /src/miking
 # Historic patch for javascript test case
 # RUN patch -u test/js/make.sh < /src/patches/0001-*.patch
 
-RUN eval $(opam env) && make install test-all test-sundials clean
+RUN eval $(opam env)   \
+ && make install       \
+ && make test-all      \
+ && make test-sundials \
+ && make clean
 
 WORKDIR /root
 

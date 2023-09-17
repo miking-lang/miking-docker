@@ -144,6 +144,10 @@ been validated for. Copy paste this checklist to your PR description:
 - [ ] miking-alpine (amd64 / x86_64)
 - [ ] miking-alpine (arm64 / M1 Mac)
 - [ ] miking-cuda (amd64 / x86_64)
+
+**Validated GPU tests:**
+
+- [ ] miking-cuda (amd64 / x86_64)
 ```
 
 It should look like this when formatted by GitHub:
@@ -154,5 +158,12 @@ It should look like this when formatted by GitHub:
 - [ ] miking-alpine (arm64 / M1 Mac)
 - [ ] miking-cuda (amd64 / x86_64)
 
-Tick each box once the build is validated. A build is validated when the miking
-image successfully builds with all tests passing.
+**Validated GPU tests:**
+
+- [ ] miking-cuda (amd64 / x86_64)
+
+Tick each box under "Validated builds" once the build is validated. A build is
+validated when the miking image successfully builds with all tests passing. If
+an image is also listed under "Validated GPU tests", the command
+`make -C <DIR> test-gpu/<arch>` must also be run which runs additional tests
+with a GPU. Tick the box if and only if this test has also succeeded.
