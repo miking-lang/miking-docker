@@ -41,7 +41,7 @@ make -C <DIR> build/<arch>
 Each miking image is based on a baseline image. **Before building a miking
 image, its corresponding baseline image has to be built.** If the correct
 baseline image already exists on Docker Hub, that can be pulled directly
-instead and you can skip the "Baseline Image" step below.
+instead and you can skip the _Baseline Image_ step below.
 
 ## Baseline Image
 
