@@ -23,6 +23,8 @@ host system.
 # Table of Contents
 
  * [Build](#build)
+   * [Baseline Image](#baseline-image)
+   * [Miking Image](#miking-image)
  * [Running the Image](#running-the-image)
    * [Verify Compilation](#verify-compilation)
  * [Contributing](#contributing)
