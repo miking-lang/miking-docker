@@ -58,6 +58,13 @@ which contains all the necessary dependencies to build the miking compiler, but
 not the compiler itself. The `<arch>` part is necessary to specify some
 compiler options for certain dependencies.
 
+This should then be pushed to Docker Hub. Do that by running the `push/<arch>`
+command for that image:
+
+```sh
+make -C baseline-alpine push/amd64
+```
+
 ## Miking Image
 
 After the baseline image has been built, the `miking-alpine` image can now be
