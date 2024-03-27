@@ -34,5 +34,12 @@ build/%:
 	             .. 2>&1 | tee -a $(LOGFILE)
 	$(VALIDATE_IMAGE_SCRIPT) --arch=$* $(IMAGENAME):$(VERSION)-$*
 
+push:
+	@echo -e "\033[1;31mSpecify the platform you are pushing for with \033[1;37mmake push/<arch>\033[0m"
+
+push/%:
+	$(VALIDATE_ARCH_SCRIPT) $*
+	docker push $(IMAGENAME):$(VERSION)-$*
+
 rmi:
 	docker rmi $(IMAGENAME):$(VERSION)
