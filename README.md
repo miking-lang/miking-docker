@@ -23,6 +23,8 @@ host system.
 # Table of Contents
 
  * [Build](#build)
+   * [Baseline Image](#baseline-image)
+   * [Miking Image](#miking-image)
  * [Running the Image](#running-the-image)
    * [Verify Compilation](#verify-compilation)
  * [Contributing](#contributing)
@@ -39,29 +41,44 @@ make -C <DIR> build/<arch>
 ```
 
 Each miking image is based on a baseline image. **Before building a miking
-image, its corresponding baseline image has to be built.**
+image, its corresponding baseline image has to be built.** If the correct
+baseline image already exists on Docker Hub, that can be pulled directly
+instead and you can skip the _Baseline Image_ step below.
 
-For example, before building the `miking-alpine` image, the matching
-`baseline-alpine` image has to be built first. Build it for amd64/x86_64 by
-running make on its directory:
+## Baseline Image
+
+Taking the alpine image as an example, before building the `miking-alpine`
+image, the matching `baseline-alpine` image has to be built first. Build it
+for amd64/x86_64 by running make on its directory:
 
 ```sh
 make -C baseline-alpine build/amd64
 ```
 
-This will create baseline image `mikinglang/baseline:<basever>-alpine` which
-contains all the necessary dependencies to build the miking compiler, but not
-the compiler itself. The `<arch>` part is necessary to specify some compiler
-options for certain dependencies. After the baseline image has been built, the
-`miking-alpine` image can now be built by running make on its directory:
+This will create baseline image `mikinglang/baseline:<basever>-alpine-amd64`
+which contains all the necessary dependencies to build the miking compiler, but
+not the compiler itself. The `<arch>` part is necessary to specify some
+compiler options for certain dependencies.
+
+This should then be pushed to Docker Hub. Do that by running the `push/<arch>`
+command for that image:
+
+```sh
+make -C baseline-alpine push/amd64
+```
+
+## Miking Image
+
+After the baseline image has been built, the `miking-alpine` image can now be
+built by running make on its directory:
 
 ```sh
 make -C miking-alpine build/amd64
 ```
 
-This will create the versioned image `mikinglang/miking:<miver>-alpine`. This
-image can then be used directly, or pushed up to Docker Hub. To push it up to
-Docker Hub, make sure that you have push access to the mikinglang repository
+This will create the versioned image `mikinglang/miking:<miver>-alpine-amd64`.
+This image can then be used directly, or pushed up to Docker Hub. To push it up
+to Docker Hub, make sure that you have push access to the mikinglang repository
 and then run the make rule (replace `amd64` with the architecture of your
 platform):
 
