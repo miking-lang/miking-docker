@@ -27,4 +27,6 @@ RUN eval $(opam env)   \
 
 WORKDIR /root
 
+ENV MCORE_LIBS="stdlib=/root/.local/lib/mcore/stdlib"
+
 CMD ["mi"]

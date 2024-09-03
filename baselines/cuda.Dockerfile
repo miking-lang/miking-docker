@@ -1,6 +1,4 @@
-FROM alpine:3.18.3
-
-RUN apk add bash
+FROM nvidia/cuda:11.4.3-devel-ubuntu20.04
 
 SHELL ["/bin/bash", "-c"]
 
@@ -11,10 +9,17 @@ RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\03
  && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
  && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
-# Install dependencies available through apk
-RUN apk add opam make cmake m4 bubblewrap git rsync mercurial gcc g++ curl \
-    linux-headers zlib-dev openblas-dev lapack-dev nodejs-current openjdk17 \
-    autoconf
+# Install dependencies and opam (also need to add the Nvidia key)
+RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
+ && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \
+ && apt-get update \
+ && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+ && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial nodejs \
+    libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 libpython3-dev \
+    libtinfo-dev libgmp-dev build-essential curl libffi-dev libffi7 libgmp-dev \
+    libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk autoconf \
+ && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
+ && chmod +x /usr/local/bin/opam
 
 # Install sundials manually
 RUN mkdir -p /src/sundials \
@@ -35,8 +40,9 @@ ARG TARGETPLATFORM
 #       cleaning of unwanted files in the same layer.
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
-# 2. Create the 5.0.0~rc1 environment
+# 2. Create the 5.0.0 environment
  && opam switch create miking-ocaml 5.0.0 \
+ && eval $(opam env --switch=miking-ocaml) \
 # 3. Setup platform compiler specific flags
  && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
  && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
@@ -49,8 +55,8 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "OWL_AEOS_CFLAGS=\"$OWL_AEOS_CFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
-# 4. Install ocaml packages
- && opam install -y --assume-depexts dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
+# 4. Install ocaml packages (there is a bug with that conf-openblas cannot find alpine packages, so treat this package separately)
+ && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.1.1 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
@@ -72,13 +78,46 @@ RUN opam init --disable-sandboxing --auto-setup \
 # Add the opam environment as default
 RUN echo "eval \$(opam env)" >> /root/.bashrc
 
+# Install Futhark
+RUN export PATH="/root/.ghcup/bin:$PATH" \
+ && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | \
+    BOOTSTRAP_HASKELL_NONINTERACTIVE=1 \
+    BOOTSTRAP_HASKELL_GHC_VERSION=9.2.5 \
+    BOOTSTRAP_HASKELL_CABAL_VERSION=3.6.2 \
+    BOOTSTRAP_HASKELL_INSTALL_NO_STACK=1 \
+    BOOTSTRAP_HASKELL_ADJUST_BASHRC=P \
+    sh \
+ && cd /src \
+ && wget https://github.com/diku-dk/futhark/archive/refs/tags/v0.22.4.zip \
+ && unzip v0.22.4.zip \
+ && cd futhark-0.22.4 \
+ && make configure build install \
+ && cd /src \
+ && rm -rf /root/.cabal /root/.ghcup /src/futhark-0.22.4 /src/v0.22.4.zip
+
 WORKDIR /root
+
+# Indicate that this baseline image has support for accelerate
+ENV MIKING_HAS_FEATURE_ACCELERATE="1"
 
 # Export the opam env contents to docker ENV
 ENV PATH="/root/.opam/miking-ocaml/bin:/root/.local/bin:$PATH"
-ENV MANPATH=":/root/.opam/miking-ocaml/man"
+ENV MANPATH="$MANPATH:/root/.opam/miking-ocaml/man"
 ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
 ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
 ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
+ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
+
+# For some reason this environment variable is wrongly configured in the source image...
+# but the config seems to exist under /etc/ld.so.conf.d
+#ENV LD_LIBRARY_PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/lib:$LD_LIBRARY_PATH"
+
+# Add CPATH to allow GCC to access the CUDA includes
+ENV CPATH="/usr/local/cuda/include"
+
+# The ld linker also does not play nice with LD_LIBRARY_PATH, create some
+# symbolic links for the libraries:
+RUN mkdir -p /usr/local/lib \
+ && ls /usr/local/cuda/lib64/*.so | xargs ln -s -t /usr/local/lib
 
 CMD ["bash"]
