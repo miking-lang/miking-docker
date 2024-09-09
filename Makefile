@@ -79,8 +79,6 @@ build-baseline:
 	@echo -e " - \033[1;36mlogfile:   \033[0m $(LOGFILE)"
 	@echo -e " - \033[1;36mdockerfile:\033[0m $(DOCKERFILE)"
 
-	$(VALIDATE_ARCH_SCRIPT) "$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
-
 	mkdir -p $(BUILD_LOGDIR)
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
@@ -89,6 +87,7 @@ build-baseline:
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
+	    --platform="$(ARCH)" \
 	    --build-arg "TARGETPLATFORM=$(ARCH)" \
 	    --file "$(DOCKERFILE)" \
 	    . 2>&1 | tee -a $(LOGFILE)
@@ -127,8 +126,6 @@ build-miking:
 	@echo -e " - \033[1;36mlogfile:     \033[0m $(LOGFILE)"
 	@echo -e " - \033[1;36mdockerfile:  \033[0m $(DOCKERFILE)"
 
-	$(VALIDATE_ARCH_SCRIPT) "$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
-
 	mkdir -p $(BUILD_LOGDIR)
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
@@ -137,6 +134,7 @@ build-miking:
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
+	    --platform="$(ARCH)" \
 	    --build-arg "TARGETPLATFORM=$(ARCH)" \
 	    --build-arg "BASELINE_IMAGE=$(BASELINE_TAG)" \
 	    --build-arg "MIKING_GIT_REMOTE=$(MIKING_GIT_REMOTE)" \
@@ -178,8 +176,6 @@ build-miking-dppl:
 	@echo -e " - \033[1;36mlogfile:     \033[0m $(LOGFILE)"
 	@echo -e " - \033[1;36mdockerfile:  \033[0m $(DOCKERFILE)"
 
-	$(VALIDATE_ARCH_SCRIPT) "$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
-
 	mkdir -p $(BUILD_LOGDIR)
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
@@ -188,6 +184,7 @@ build-miking-dppl:
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
+	    --platform="$(ARCH)" \
 	    --build-arg "TARGETPLATFORM=$(ARCH)" \
 	    --build-arg "MIKING_IMAGE=$(MIKING_TAG)" \
 	    --build-arg "MIKING_DPPL_GIT_REMOTE=$(MIKING_DPPL_GIT_REMOTE)" \
@@ -205,6 +202,34 @@ build-miking-dppl:
 #	           --hostname miking-test-gpu \
 #	           $(IMAGENAME):$(VERSION)-$* \
 #	           make -C /src/miking install test-accelerate
+
+# Provide with
+#    BASELINE=arch
+manifests:
+	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
+	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
+	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
+	$(eval DOCKERFILE := Dockerfile-miking)
+	$(eval MIKING_TAG_NOARCH := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE))
+	$(eval BASELINE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(ARCH)))
+	$(eval AMENDMENTS := $(shell \
+	  if echo "$(BASELINES_AMD64)" | grep -w -q "$(BASELINE)"; then \
+	    echo "--amend $(MIKING_TAG_NOARCH)-linux-amd64"; \
+	  fi; \
+	  if echo "$(BASELINES_ARM64)" | grep -w -q "$(BASELINE)"; then \
+	    echo "--amend $(MIKING_TAG_NOARCH)-linux-arm64"; \
+	  fi   \
+	 ))
+
+	@if [[ -z "$(BASELINE)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
+	     exit 1; \
+	 fi
+
+	@echo $(AMENDMENTS)
+
+	echo "TODO"
+
 
 
 # TODO: Convert these functions to work with the new setup
