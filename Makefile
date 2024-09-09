@@ -103,7 +103,7 @@ build-miking:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
-	$(eval DOCKERFILE := Dockerfile-generic)
+	$(eval DOCKERFILE := Dockerfile-miking)
 	$(eval IMAGE_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
 	$(eval BASELINE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(ARCH)))
 
@@ -154,7 +154,7 @@ build-miking-dppl:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
-	$(eval DOCKERFILE := Dockerfile-generic)
+	$(eval DOCKERFILE := Dockerfile-miking-dppl)
 	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
 	$(eval IMAGE_TAG := $(VERSION_MIKING_DPPL):$(IMAGENAME_MIKING_DPPL)-$(BASELINE)-$(subst /,-,$(ARCH)))
 
