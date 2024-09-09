@@ -1,6 +1,6 @@
 .PHONY: build-baseline \
-        build-linux-amd64-baseline-images \
-        build-linux-arm64-baseline-images \
+        build-miking \
+        build-miking-dppl \
         list-baselines
 
 # This can be overriden to use podman by CONTAINER_RUNTIME=podman
@@ -27,20 +27,27 @@ MIKING_DPPL_GIT_COMMIT = 960519a6afd2f6edd50a5c5b6f404314c732d0a3
 VALIDATE_ARCH_SCRIPT  = ./scripts/validate_architecture.py
 VALIDATE_IMAGE_SCRIPT = ./scripts/validate_image.py
 
+BASELINES_AMD64 = alpine3.20 debian12.6 cuda11.4
+BASELINES_ARM64 = alpine3.20 debian12.6
 
-BASELINES = $(foreach f, $(shell ls baselines/*.Dockerfile), $(shell basename "$f" .Dockerfile))
+
 list-baselines:
-	@echo $(BASELINES)
+	@echo $(foreach f, $(shell ls baselines/*.Dockerfile), $(shell basename "$f" .Dockerfile))
+
+define FOREACH_NEWLINE
 
 
-build-linux-amd64-baseline-images:
-	make build-baseline BASELINE=alpine3.20 ARCH=linux/amd64
-	make build-baseline BASELINE=debian12.6 ARCH=linux/amd64
-	make build-baseline BASELINE=cuda11.4   ARCH=linux/amd64
+endef
 
-build-linux-arm64-baseline-images:
-	make build-baseline BASELINE=alpine3.20 ARCH=linux/arm64
-	make build-baseline BASELINE=debian12.6 ARCH=linux/arm64
+# Example usages:
+#  - `make build-baseline-all-linux-amd64`
+#  - `make build-miking-dppl-all-linux-arm64`
+%-all-linux-amd64:
+	$(foreach be, $(BASELINES_AMD64), make $* BASELINE=$(be) ARCH=linux/amd64 ${FOREACH_NEWLINE})
+
+%-all-linux-arm64:
+	$(foreach be, $(BASELINES_ARM64), make $* BASELINE=$(be) ARCH=linux/arm64 ${FOREACH_NEWLINE})
+
 
 
 # Provide the image and target with
