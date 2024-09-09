@@ -68,6 +68,10 @@ build-baseline:
 	     echo -e "\033[1;31mERROR:\033[0m Architecture not provided (provide with ARCH=arch)"; \
 	     exit 1; \
 	 fi
+	@if [[ ! -z "$$($(CONTAINER_RUNTIME) images -n -f 'reference=$(IMAGE_TAG)')" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Image $(IMAGE_TAG) already exists. Remove it before rebuilding."; \
+	     exit 1; \
+	 fi
 
 	@echo -e "\033[4;36mBuild variables:\033[0m"
 	@echo -e " - \033[1;36mruntime:   \033[0m $(CONTAINER_RUNTIME)"
@@ -209,9 +213,7 @@ manifests:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
-	$(eval DOCKERFILE := Dockerfile-miking)
 	$(eval MIKING_TAG_NOARCH := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE))
-	$(eval BASELINE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(ARCH)))
 	$(eval AMENDMENTS := $(shell \
 	  if echo "$(BASELINES_AMD64)" | grep -w -q "$(BASELINE)"; then \
 	    echo "--amend $(MIKING_TAG_NOARCH)-linux-amd64"; \
