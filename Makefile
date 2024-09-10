@@ -182,7 +182,7 @@ build-miking-dppl:
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
 	$(eval DOCKERFILE := Dockerfile-miking-dppl)
 	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
-	$(eval IMAGE_TAG := $(VERSION_MIKING_DPPL):$(IMAGENAME_MIKING_DPPL)-$(BASELINE)-$(subst /,-,$(ARCH)))
+	$(eval IMAGE_TAG := $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(BASELINE)-$(subst /,-,$(ARCH)))
 
 	@if [[ -z "$(BASELINE)" ]]; then \
 	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
@@ -198,7 +198,7 @@ build-miking-dppl:
 	@echo -e " - \033[1;36mbaseline:    \033[0m $(BASELINE)"
 	@echo -e " - \033[1;36march:        \033[0m $(ARCH)"
 	@echo -e " - \033[1;36mimage tag:   \033[0m $(IMAGE_TAG)"
-	@echo -e " - \033[1;36mmiking tag:  \033[0m $(IMAGE_TAG)"
+	@echo -e " - \033[1;36mmiking tag:  \033[0m $(MIKING_TAG)"
 	@echo -e " - \033[1;36muid:         \033[0m $(UID)"
 	@echo -e " - \033[1;36mgid:         \033[0m $(GID)"
 	@echo -e " - \033[1;36mlogfile:     \033[0m $(LOGFILE)"
