@@ -1,10 +1,17 @@
-.PHONY: build-baseline \
+.PHONY: print-variables \
+        list-baselines \
+        build-baseline \
         build-miking \
-        build-miking-dppl \
-        list-baselines
+        build-miking-dppl
 
 # This can be overriden to use podman by CONTAINER_RUNTIME=podman
 CONTAINER_RUNTIME ?= docker
+
+ifeq ($(CONTAINER_RUNTIME),docker)
+CMD_BUILD = docker build
+else
+CMD_BUILD = podman build --format=docker
+endif
 
 SHELL = bash
 
@@ -30,6 +37,23 @@ VALIDATE_IMAGE_SCRIPT = ./scripts/validate_image.py
 BASELINES_AMD64 = alpine3.20 debian12.6 cuda11.4
 BASELINES_ARM64 = alpine3.20 debian12.6
 
+print-variables:
+	@echo -e "\033[4;36mMakefile variables:\033[0m"
+	@echo -e " - \033[1;36mCONTAINER_RUNTIME      \033[0m= $(CONTAINER_RUNTIME)"
+	@echo -e " - \033[1;36mCMD_BUILD              \033[0m= $(CMD_BUILD)"
+	@echo -e " - \033[1;36mSHELL                  \033[0m= $(SHELL)"
+	@echo -e " - \033[1;36mVERSION_BASELINE       \033[0m= $(VERSION_BASELINE)"
+	@echo -e " - \033[1;36mVERSION_MIKING         \033[0m= $(VERSION_MIKING)"
+	@echo -e " - \033[1;36mVERSION_MIKING_DPPL    \033[0m= $(VERSION_MIKING_DPPL)"
+	@echo -e " - \033[1;36mBUILD_LOGDIR           \033[0m= $(BUILD_LOGDIR)"
+	@echo -e " - \033[1;36mMIKING_GIT_REMOTE      \033[0m= $(MIKING_GIT_REMOTE)"
+	@echo -e " - \033[1;36mMIKING_GIT_COMMIT      \033[0m= $(MIKING_GIT_COMMIT)"
+	@echo -e " - \033[1;36mMIKING_DPPL_GIT_REMOTE \033[0m= $(MIKING_DPPL_GIT_REMOTE)"
+	@echo -e " - \033[1;36mMIKING_DPPL_GIT_COMMIT \033[0m= $(MIKING_DPPL_GIT_COMMIT)"
+	@echo -e " - \033[1;36mVALIDATE_ARCH_SCRIPT   \033[0m= $(VALIDATE_ARCH_SCRIPT)"
+	@echo -e " - \033[1;36mVALIDATE_IMAGE_SCRIPT  \033[0m= $(VALIDATE_IMAGE_SCRIPT)"
+	@echo -e " - \033[1;36mBASELINES_AMD64        \033[0m= $(BASELINES_AMD64)"
+	@echo -e " - \033[1;36mBASELINES_ARM64        \033[0m= $(BASELINES_ARM64)"
 
 list-baselines:
 	@echo $(foreach f, $(shell ls baselines/*.Dockerfile), $(shell basename "$f" .Dockerfile))
@@ -87,7 +111,7 @@ build-baseline:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	$(CONTAINER_RUNTIME) build \
+	$(CMD_BUILD) \
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
@@ -134,7 +158,7 @@ build-miking:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	$(CONTAINER_RUNTIME) build \
+	$(CMD_BUILD) \
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
@@ -184,7 +208,7 @@ build-miking-dppl:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	$(CONTAINER_RUNTIME) build \
+	$(CMD_BUILD) \
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
