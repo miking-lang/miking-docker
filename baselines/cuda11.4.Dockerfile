@@ -108,16 +108,11 @@ ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miki
 ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
 
-# For some reason this environment variable is wrongly configured in the source image...
-# but the config seems to exist under /etc/ld.so.conf.d
-#ENV LD_LIBRARY_PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/lib:$LD_LIBRARY_PATH"
+# The config seems to exist under /etc/ld.so.conf.d, but OCaml does not seem
+# to respect this when linking externals.
+ENV LD_LIBRARY_PATH="/usr/local/cuda/targets/x86_64-linux/lib:/usr/local/cuda-11/targets/x86_64-linux/lib:/usr/local/cuda-11.4/targets/x86_64-linux/lib:/usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
 
 # Add CPATH to allow GCC to access the CUDA includes
 ENV CPATH="/usr/local/cuda/include"
-
-# The ld linker also does not play nice with LD_LIBRARY_PATH, create some
-# symbolic links for the libraries:
-RUN mkdir -p /usr/local/lib \
- && ls /usr/local/cuda/lib64/*.so | xargs ln -s -t /usr/local/lib
 
 CMD ["bash"]

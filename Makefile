@@ -208,11 +208,8 @@ build-miking-dppl:
 #	           make -C /src/miking install test-accelerate
 
 # Provide with
-#    BASELINE=arch
-manifests:
-	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
-	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
-	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
+#    BASELINE=name
+manifest-miking:
 	$(eval MIKING_TAG_NOARCH := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE))
 	$(eval AMENDMENTS := $(shell \
 	  if echo "$(BASELINES_AMD64)" | grep -w -q "$(BASELINE)"; then \
@@ -231,6 +228,7 @@ manifests:
 	@echo $(AMENDMENTS)
 
 	echo "TODO"
+	exit 1
 
 
 
