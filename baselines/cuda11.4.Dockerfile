@@ -112,6 +112,8 @@ ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
 # to respect this when linking externals.
 ENV LD_LIBRARY_PATH="/usr/local/cuda/targets/x86_64-linux/lib:/usr/local/cuda-11/targets/x86_64-linux/lib:/usr/local/cuda-11.4/targets/x86_64-linux/lib:/usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
 
+RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
+
 # Add CPATH to allow GCC to access the CUDA includes
 ENV CPATH="/usr/local/cuda/include"
 

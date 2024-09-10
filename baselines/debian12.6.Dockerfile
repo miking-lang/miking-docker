@@ -87,4 +87,11 @@ ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
 ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
 ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 
+# The config seems to exist under /etc/ld.so.conf.d, but OCaml does not seem
+# to respect this when linking externals. Then we run the command below to
+# ensure that the environment variable corresponds to what we would expect.
+ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu/libfakeroot:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
+
+RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
+
 CMD ["bash"]
