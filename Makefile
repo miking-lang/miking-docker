@@ -8,9 +8,13 @@
 CONTAINER_RUNTIME ?= docker
 
 ifeq ($(CONTAINER_RUNTIME),docker)
-CMD_BUILD = docker build
+CMD_BUILD    = docker build
+CMD_RUN      = docker run
+CMD_RUN_CUDA = docker run --gpus all
 else
-CMD_BUILD = podman build --format=docker
+CMD_BUILD    = podman build --format=docker
+CMD_RUN      = podman run
+CMD_RUN_CUDA = podman run --device nvidia.com/gpu=all
 endif
 
 SHELL = bash
@@ -43,6 +47,8 @@ print-variables:
 	@echo -e "\033[4;36mMakefile variables:\033[0m"
 	@echo -e " - \033[1;36mCONTAINER_RUNTIME      \033[0m= $(CONTAINER_RUNTIME)"
 	@echo -e " - \033[1;36mCMD_BUILD              \033[0m= $(CMD_BUILD)"
+	@echo -e " - \033[1;36mCMD_RUN                \033[0m= $(CMD_RUN)"
+	@echo -e " - \033[1;36mCMD_RUN_CUDA           \033[0m= $(CMD_RUN_CUDA)"
 	@echo -e " - \033[1;36mSHELL                  \033[0m= $(SHELL)"
 	@echo -e " - \033[1;36mVERSION_BASELINE       \033[0m= $(VERSION_BASELINE)"
 	@echo -e " - \033[1;36mVERSION_MIKING         \033[0m= $(VERSION_MIKING)"
@@ -250,13 +256,16 @@ build-miking-dppl:
 	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --arch="$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
 
 
-# TODO: Test GPU functionality with Miking
-#test-gpu:
-#	docker run --rm -it --gpus all \
-#	           --name miking-test-gpu \
-#	           --hostname miking-test-gpu \
-#	           $(IMAGENAME):$(VERSION)-$* \
-#	           make -C /src/miking install test-accelerate
+# Test GPU functionality with Miking's CUDA image
+test-cuda:
+	$(eval BASELINE := cuda11.4)
+	$(eval ARCH := linux/amd64)
+	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
+	$(CMD_RUN_CUDA) \
+	    --rm -it \
+	    $(MIKING_TAG) \
+	    make -C /src/miking install test-accelerate
+
 
 # Provide with
 #    BASELINE=name
