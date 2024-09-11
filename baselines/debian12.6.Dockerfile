@@ -56,7 +56,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages (there is a bug with that conf-openblas cannot find alpine packages, so treat this package separately)
- && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.1.1 ocamlformat.0.24.1 \
+ && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.0.10.0 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
@@ -90,7 +90,8 @@ ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 # The config seems to exist under /etc/ld.so.conf.d, but OCaml does not seem
 # to respect this when linking externals. Then we run the command below to
 # ensure that the environment variable corresponds to what we would expect.
-ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu/libfakeroot:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
+ARG TARGET_LIB_PATH
+ENV LD_LIBRARY_PATH="$TARGET_LIB_PATH"
 
 RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
 

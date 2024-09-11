@@ -52,7 +52,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages (there is a bug with that conf-openblas cannot find alpine packages, so treat this package separately)
  && opam install -y --no-depexts conf-openblas.0.2.1 \
- && opam install -y --assume-depexts dune linenoise menhir pyml toml lwt owl.1.1 ocamlformat.0.24.1 \
+ && opam install -y --assume-depexts dune linenoise menhir pyml toml lwt owl.0.10.0 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
