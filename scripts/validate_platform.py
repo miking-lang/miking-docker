@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 parser = argparse.ArgumentParser()
-parser.add_argument("arch", help="Name of the architecture")
+parser.add_argument("platform", help="Name of the platform (<os>/<arch>)")
 parser.add_argument("--runtime", choices=["docker", "podman"], default="docker",
                     help="Which runtime that is being used. (Default: docker)")
 args = parser.parse_args()
@@ -23,7 +23,7 @@ if args.runtime == "docker":
         sys.exit(e.returncode)
 
     arch = arch.decode("utf-8").strip()
-    arch = ARCH_ALIASES.get(arch, arch)
+    platform = ARCH_ALIASES.get(arch, arch)
 
 elif args.runtime == "podman":
     try:
@@ -33,13 +33,13 @@ elif args.runtime == "podman":
         sys.exit(e.returncode)
 
     podman_info = json.loads(podman_output)
-    arch = podman_info["version"]["OsArch"]
+    platform = podman_info["version"]["OsArch"]
 
 
-if arch != args.arch:
-    print(f"\033[1;31mMismatch between provided architecture \"{args.arch}\"" +
-          f" and actual architecture \"{arch}\"\033[0m")
+if platform != args.platform:
+    print(f"\033[1;31mMismatch between provided platform \"{args.platform}\"" +
+          f" and actual platform \"{platform}\"\033[0m")
     sys.exit(1)
 else:
-    print("\033[1;32marchitecture ok\033[0m")
+    print("\033[1;32mplatform ok\033[0m")
     sys.exit(0)

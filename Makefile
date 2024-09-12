@@ -35,8 +35,8 @@ MIKING_GIT_COMMIT = fdce4618293c562bb56eb01028bb4db3358a5ddf
 MIKING_DPPL_GIT_REMOTE = https://github.com/miking-lang/miking-dppl.git
 MIKING_DPPL_GIT_COMMIT = 960519a6afd2f6edd50a5c5b6f404314c732d0a3
 
-VALIDATE_ARCH_SCRIPT  = ./scripts/validate_architecture.py
-VALIDATE_IMAGE_SCRIPT = ./scripts/validate_image.py
+VALIDATE_PLATFORM_SCRIPT = ./scripts/validate_platform.py
+VALIDATE_IMAGE_SCRIPT    = ./scripts/validate_image.py
 
 BASELINES_AMD64 = alpine3.20 debian12.6 cuda11.4
 BASELINES_ARM64 = alpine3.20 debian12.6
@@ -45,24 +45,24 @@ BASELINE_IMPLICIT = debian12.6
 
 print-variables:
 	@echo -e "\033[4;36mMakefile variables:\033[0m"
-	@echo -e " - \033[1;36mCONTAINER_RUNTIME      \033[0m= $(CONTAINER_RUNTIME)"
-	@echo -e " - \033[1;36mCMD_BUILD              \033[0m= $(CMD_BUILD)"
-	@echo -e " - \033[1;36mCMD_RUN                \033[0m= $(CMD_RUN)"
-	@echo -e " - \033[1;36mCMD_RUN_CUDA           \033[0m= $(CMD_RUN_CUDA)"
-	@echo -e " - \033[1;36mSHELL                  \033[0m= $(SHELL)"
-	@echo -e " - \033[1;36mVERSION_BASELINE       \033[0m= $(VERSION_BASELINE)"
-	@echo -e " - \033[1;36mVERSION_MIKING         \033[0m= $(VERSION_MIKING)"
-	@echo -e " - \033[1;36mVERSION_MIKING_DPPL    \033[0m= $(VERSION_MIKING_DPPL)"
-	@echo -e " - \033[1;36mBUILD_LOGDIR           \033[0m= $(BUILD_LOGDIR)"
-	@echo -e " - \033[1;36mMIKING_GIT_REMOTE      \033[0m= $(MIKING_GIT_REMOTE)"
-	@echo -e " - \033[1;36mMIKING_GIT_COMMIT      \033[0m= $(MIKING_GIT_COMMIT)"
-	@echo -e " - \033[1;36mMIKING_DPPL_GIT_REMOTE \033[0m= $(MIKING_DPPL_GIT_REMOTE)"
-	@echo -e " - \033[1;36mMIKING_DPPL_GIT_COMMIT \033[0m= $(MIKING_DPPL_GIT_COMMIT)"
-	@echo -e " - \033[1;36mVALIDATE_ARCH_SCRIPT   \033[0m= $(VALIDATE_ARCH_SCRIPT)"
-	@echo -e " - \033[1;36mVALIDATE_IMAGE_SCRIPT  \033[0m= $(VALIDATE_IMAGE_SCRIPT)"
-	@echo -e " - \033[1;36mBASELINES_AMD64        \033[0m= $(BASELINES_AMD64)"
-	@echo -e " - \033[1;36mBASELINES_ARM64        \033[0m= $(BASELINES_ARM64)"
-	@echo -e " - \033[1;36mBASELINE_IMPLICIT      \033[0m= $(BASELINE_IMPLICIT)"
+	@echo -e " - \033[1;36mCONTAINER_RUNTIME        \033[0m= $(CONTAINER_RUNTIME)"
+	@echo -e " - \033[1;36mCMD_BUILD                \033[0m= $(CMD_BUILD)"
+	@echo -e " - \033[1;36mCMD_RUN                  \033[0m= $(CMD_RUN)"
+	@echo -e " - \033[1;36mCMD_RUN_CUDA             \033[0m= $(CMD_RUN_CUDA)"
+	@echo -e " - \033[1;36mSHELL                    \033[0m= $(SHELL)"
+	@echo -e " - \033[1;36mVERSION_BASELINE         \033[0m= $(VERSION_BASELINE)"
+	@echo -e " - \033[1;36mVERSION_MIKING           \033[0m= $(VERSION_MIKING)"
+	@echo -e " - \033[1;36mVERSION_MIKING_DPPL      \033[0m= $(VERSION_MIKING_DPPL)"
+	@echo -e " - \033[1;36mBUILD_LOGDIR             \033[0m= $(BUILD_LOGDIR)"
+	@echo -e " - \033[1;36mMIKING_GIT_REMOTE        \033[0m= $(MIKING_GIT_REMOTE)"
+	@echo -e " - \033[1;36mMIKING_GIT_COMMIT        \033[0m= $(MIKING_GIT_COMMIT)"
+	@echo -e " - \033[1;36mMIKING_DPPL_GIT_REMOTE   \033[0m= $(MIKING_DPPL_GIT_REMOTE)"
+	@echo -e " - \033[1;36mMIKING_DPPL_GIT_COMMIT   \033[0m= $(MIKING_DPPL_GIT_COMMIT)"
+	@echo -e " - \033[1;36mVALIDATE_PLATFORM_SCRIPT \033[0m= $(VALIDATE_PLATFORM_SCRIPT)"
+	@echo -e " - \033[1;36mVALIDATE_IMAGE_SCRIPT    \033[0m= $(VALIDATE_IMAGE_SCRIPT)"
+	@echo -e " - \033[1;36mBASELINES_AMD64          \033[0m= $(BASELINES_AMD64)"
+	@echo -e " - \033[1;36mBASELINES_ARM64          \033[0m= $(BASELINES_ARM64)"
+	@echo -e " - \033[1;36mBASELINE_IMPLICIT        \033[0m= $(BASELINE_IMPLICIT)"
 
 list-baselines:
 	@echo $(foreach f, $(shell ls baselines/*.Dockerfile), $(shell basename "$f" .Dockerfile))
@@ -76,49 +76,34 @@ endef
 #  - `make build-baseline-all-linux/amd64`
 #  - `make build-miking-dppl-all-linux/arm64`
 %-all-linux/amd64:
-	$(foreach be, $(BASELINES_AMD64), make $* BASELINE=$(be) ARCH=linux/amd64 ${FOREACH_NEWLINE})
+	$(foreach be, $(BASELINES_AMD64), make $* BASELINE=$(be) PLATFORM=linux/amd64 ${FOREACH_NEWLINE})
 
 %-all-linux/arm64:
-	$(foreach be, $(BASELINES_ARM64), make $* BASELINE=$(be) ARCH=linux/arm64 ${FOREACH_NEWLINE})
+	$(foreach be, $(BASELINES_ARM64), make $* BASELINE=$(be) PLATFORM=linux/arm64 ${FOREACH_NEWLINE})
 
 # TODO:
 #  - This is highly experimental, but would allow to build images in parallel.
 %-parallel-linux/amd64:
-	parallel --tagstring "{}:" --line-buffer make $* ARCH=linux/amd64 BASELINE={} ::: $(BASELINES_AMD64)
+	parallel --tagstring "{}:" --line-buffer make $* PLATFORM=linux/amd64 BASELINE={} ::: $(BASELINES_AMD64)
 
 
 
 # Provide the image and target with
 #    BASELINE=name
-#    ARCH=arch
+#    PLATFORM=platform
 build-baseline:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+baseline_%Y-%m-%d_%H.%M.%S.log"))
 	$(eval DOCKERFILE := baselines/$(BASELINE).Dockerfile)
-	$(eval IMAGE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(ARCH)))
-	$(eval LIB_PATH := $(shell \
-	  if [[ "$(BASELINE)" == "cuda11.4" ]]; then \
-	      echo "/usr/local/cuda/targets/x86_64-linux/lib:/usr/local/cuda-11/targets/x86_64-linux/lib:/usr/local/cuda-11.4/targets/x86_64-linux/lib:/usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"; \
-	  elif [[ "$(BASELINE)" == "debian12.6" ]]; then \
-	      if [[ "$(ARCH)" == "linux/amd64" ]]; then \
-	          echo "/usr/lib/x86_64-linux-gnu/libfakeroot:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"; \
-	      elif [[ "$(ARCH)" == "linux/arm64" ]]; then \
-	          echo "/usr/local/lib/aarch64-linux-gnu:/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu:/usr/lib/aarch64-linux-gnu/libfakeroot:/usr/local/lib"; \
-	      else \
-	          echo "unused"; \
-	      fi; \
-	  else \
-	      echo "unused"; \
-	  fi \
-	))
+	$(eval IMAGE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 
 	@if [[ -z "$(BASELINE)" ]]; then \
 	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
 	     exit 1; \
 	 fi
-	@if [[ -z "$(ARCH)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Architecture not provided (provide with ARCH=arch)"; \
+	@if [[ -z "$(PLATFORM)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=arch)"; \
 	     exit 1; \
 	 fi
 	@if [[ ! -z "$$($(CONTAINER_RUNTIME) images -n -f 'reference=$(IMAGE_TAG)')" ]]; then \
@@ -126,12 +111,10 @@ build-baseline:
 	     exit 1; \
 	 fi
 
-	# Set LD_LIBRARY_PATH variable for each baseline
-
 	@echo -e "\033[4;36mBuild variables:\033[0m"
 	@echo -e " - \033[1;36mruntime:    \033[0m$(CONTAINER_RUNTIME)"
 	@echo -e " - \033[1;36mbaseline:   \033[0m$(BASELINE)"
-	@echo -e " - \033[1;36march:       \033[0m$(ARCH)"
+	@echo -e " - \033[1;36mplatform:   \033[0m$(PLATFORM)"
 	@echo -e " - \033[1;36mimage tag:  \033[0m$(IMAGE_TAG)"
 	@echo -e " - \033[1;36mlib path:   \033[0m$(LIB_PATH)"
 	@echo -e " - \033[1;36muid:        \033[0m$(UID)"
@@ -147,39 +130,38 @@ build-baseline:
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
-	    --platform="$(ARCH)" \
-	    --build-arg "TARGETPLATFORM=$(ARCH)" \
-	    --build-arg "TARGET_LIB_PATH=$(LIB_PATH)" \
+	    --platform="$(PLATFORM)" \
+	    $(shell ./baselines/conf.py build-args --platform=$(PLATFORM) --baseline=$(BASELINE)) \
 	    --file "$(DOCKERFILE)" \
 	    . 2>&1 | tee -a $(LOGFILE)
 
-	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --arch="$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
+	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --platform="$(PLATFORM)" --runtime="$(CONTAINER_RUNTIME)"
 
 
 # Provide the image and target with
 #    BASELINE=name
-#    ARCH=arch
+#    PLATFORM=platform
 build-miking:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
 	$(eval DOCKERFILE := Dockerfile-miking)
-	$(eval IMAGE_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
-	$(eval BASELINE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(ARCH)))
+	$(eval IMAGE_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
+	$(eval BASELINE_TAG := $(IMAGENAME_BASELINE):$(VERSION_BASELINE)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 
 	@if [[ -z "$(BASELINE)" ]]; then \
 	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
 	     exit 1; \
 	 fi
-	@if [[ -z "$(ARCH)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Architecture not provided (provide with ARCH=arch)"; \
+	@if [[ -z "$(PLATFORM)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)"; \
 	     exit 1; \
 	 fi
 
 	@echo -e "\033[4;36mBuild variables:\033[0m"
 	@echo -e " - \033[1;36mruntime:     \033[0m $(CONTAINER_RUNTIME)"
 	@echo -e " - \033[1;36mbaseline:    \033[0m $(BASELINE)"
-	@echo -e " - \033[1;36march:        \033[0m $(ARCH)"
+	@echo -e " - \033[1;36mplatform:    \033[0m $(PLATFORM)"
 	@echo -e " - \033[1;36mimage tag:   \033[0m $(IMAGE_TAG)"
 	@echo -e " - \033[1;36mbaseline tag:\033[0m $(BASELINE_TAG)"
 	@echo -e " - \033[1;36muid:         \033[0m $(UID)"
@@ -195,41 +177,40 @@ build-miking:
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
-	    --platform="$(ARCH)" \
-	    --build-arg "TARGETPLATFORM=$(ARCH)" \
-	    --build-arg "BASELINE_IMAGE=$(BASELINE_TAG)" \
-	    --build-arg "MIKING_GIT_REMOTE=$(MIKING_GIT_REMOTE)" \
-	    --build-arg "MIKING_GIT_COMMIT=$(MIKING_GIT_COMMIT)" \
+	    --platform="$(PLATFORM)" \
+	    --build-arg="BASELINE_IMAGE=$(BASELINE_TAG)" \
+	    --build-arg="MIKING_GIT_REMOTE=$(MIKING_GIT_REMOTE)" \
+	    --build-arg="MIKING_GIT_COMMIT=$(MIKING_GIT_COMMIT)" \
 	    --file "$(DOCKERFILE)" \
 	    . 2>&1 | tee -a $(LOGFILE)
 
-	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --arch="$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
+	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --platform="$(PLATFORM)" --runtime="$(CONTAINER_RUNTIME)"
 
 
 # Provide the image and target with
 #    BASELINE=name
-#    ARCH=arch
+#    PLATFORM=platform
 build-miking-dppl:
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+miking_%Y-%m-%d_%H.%M.%S.log"))
 	$(eval DOCKERFILE := Dockerfile-miking-dppl)
-	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
-	$(eval IMAGE_TAG := $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(BASELINE)-$(subst /,-,$(ARCH)))
+	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
+	$(eval IMAGE_TAG := $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 
 	@if [[ -z "$(BASELINE)" ]]; then \
 	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
 	     exit 1; \
 	 fi
-	@if [[ -z "$(ARCH)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Architecture not provided (provide with ARCH=arch)"; \
+	@if [[ -z "$(PLATFORM)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)"; \
 	     exit 1; \
 	 fi
 
 	@echo -e "\033[4;36mBuild variables:\033[0m"
 	@echo -e " - \033[1;36mruntime:     \033[0m $(CONTAINER_RUNTIME)"
 	@echo -e " - \033[1;36mbaseline:    \033[0m $(BASELINE)"
-	@echo -e " - \033[1;36march:        \033[0m $(ARCH)"
+	@echo -e " - \033[1;36mplatform:    \033[0m $(PLATFORM)"
 	@echo -e " - \033[1;36mimage tag:   \033[0m $(IMAGE_TAG)"
 	@echo -e " - \033[1;36mmiking tag:  \033[0m $(MIKING_TAG)"
 	@echo -e " - \033[1;36muid:         \033[0m $(UID)"
@@ -245,22 +226,21 @@ build-miking-dppl:
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
 	    --progress=plain \
-	    --platform="$(ARCH)" \
-	    --build-arg "TARGETPLATFORM=$(ARCH)" \
-	    --build-arg "MIKING_IMAGE=$(MIKING_TAG)" \
-	    --build-arg "MIKING_DPPL_GIT_REMOTE=$(MIKING_DPPL_GIT_REMOTE)" \
-	    --build-arg "MIKING_DPPL_GIT_COMMIT=$(MIKING_DPPL_GIT_COMMIT)" \
+	    --platform="$(PLATFORM)" \
+	    --build-arg="MIKING_IMAGE=$(MIKING_TAG)" \
+	    --build-arg="MIKING_DPPL_GIT_REMOTE=$(MIKING_DPPL_GIT_REMOTE)" \
+	    --build-arg="MIKING_DPPL_GIT_COMMIT=$(MIKING_DPPL_GIT_COMMIT)" \
 	    --file "$(DOCKERFILE)" \
 	    . 2>&1 | tee -a $(LOGFILE)
 
-	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --arch="$(ARCH)" --runtime="$(CONTAINER_RUNTIME)"
+	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --platform="$(PLATFORM)" --runtime="$(CONTAINER_RUNTIME)"
 
 
 # Test GPU functionality with Miking's CUDA image
 test-cuda:
 	$(eval BASELINE := cuda11.4)
 	$(eval ARCH := linux/amd64)
-	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(ARCH)))
+	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 	$(CMD_RUN_CUDA) \
 	    --rm -it \
 	    $(MIKING_TAG) \

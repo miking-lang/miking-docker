@@ -35,7 +35,7 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
-ARG TARGETPLATFORM
+ARG TARGET_PLATFORM
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
 # 1. Initialize opam
@@ -48,7 +48,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
  && export EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math" \
  && export EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math" \
- && if [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then \
+ && if [[ "$TARGET_PLATFORM" == "linux/amd64" ]]; then \
         export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
     fi \
  && echo "OWL_CFLAGS=\"$OWL_CFLAGS\"" >> /root/imgbuild_flags.txt \
@@ -90,8 +90,8 @@ ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 # The config seems to exist under /etc/ld.so.conf.d, but OCaml does not seem
 # to respect this when linking externals. Then we run the command below to
 # ensure that the environment variable corresponds to what we would expect.
-ARG TARGET_LIB_PATH
-ENV LD_LIBRARY_PATH="$TARGET_LIB_PATH"
+ARG TARGET_LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH="$TARGET_LD_LIBRARY_PATH"
 
 RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
 
