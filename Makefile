@@ -116,7 +116,6 @@ build-baseline:
 	@echo -e " - \033[1;36mbaseline:   \033[0m$(BASELINE)"
 	@echo -e " - \033[1;36mplatform:   \033[0m$(PLATFORM)"
 	@echo -e " - \033[1;36mimage tag:  \033[0m$(IMAGE_TAG)"
-	@echo -e " - \033[1;36mlib path:   \033[0m$(LIB_PATH)"
 	@echo -e " - \033[1;36muid:        \033[0m$(UID)"
 	@echo -e " - \033[1;36mgid:        \033[0m$(GID)"
 	@echo -e " - \033[1;36mlogfile:    \033[0m$(LOGFILE)"
