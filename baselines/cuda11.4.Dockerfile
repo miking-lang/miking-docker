@@ -118,4 +118,9 @@ RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "
 # Add CPATH to allow GCC to access the CUDA includes
 ENV CPATH="/usr/local/cuda/include"
 
+# The ld linker also does not play nice with LD_LIBRARY_PATH, create some
+# symbolic links for the libraries:
+RUN mkdir -p /usr/local/lib64 \
+ && ls /usr/local/cuda/lib64/*.so | xargs ln -s -t /usr/local/lib64
+
 CMD ["bash"]
