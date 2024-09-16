@@ -239,7 +239,7 @@ build-miking-dppl:
 # Test GPU functionality with Miking's CUDA image
 test-cuda:
 	$(eval BASELINE := cuda11.4)
-	$(eval ARCH := linux/amd64)
+	$(eval PLATFORM := linux/amd64)
 	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 	$(CMD_RUN_CUDA) \
 	    --rm -it \
