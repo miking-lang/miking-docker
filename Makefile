@@ -86,6 +86,29 @@ endef
 %-parallel-linux/amd64:
 	parallel --tagstring "{}:" --line-buffer make $* PLATFORM=linux/amd64 BASELINE={} ::: $(BASELINES_AMD64)
 
+# Sequential builds. If baseline is unchanged, it is only necessary to run the
+# `seqbuild-from-miking` rule.
+seqbuild-from-baseline:
+	make build-baseline
+	make seqbuild-from-miking
+seqbuild-from-miking:
+	make build-miking
+	make build-miking-dppl
+
+seqbuild-%-all:
+	@echo "Starting concurrent builds of all images"; \
+	 pids=(); \
+	 for baseline in $(BASELINES_AMD64); do \
+	   eval "make seqbuild-$* PLATFORM=linux/amd64 BASELINE=\"$$baseline\" > seqbuild-$*-amd64-$$baseline.out &"; \
+	   pids+=("$$!"); \
+	 done; \
+	 for baseline in $(BASELINES_ARM64); do \
+	   eval "make seqbuild-$* PLATFORM=linux/arm64 BASELINE=\"$$baseline\" > seqbuild-$*-arm64-$$baseline.out &"; \
+	   pids+=("$$!"); \
+	 done; \
+	 echo "PIDS = $${pids[@]}"; \
+	 trap 'kill $${pids[@]}' INT; \
+	 wait
 
 
 # Provide the image and target with

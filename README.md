@@ -235,26 +235,72 @@ been validated for. Copy paste this checklist to your PR description:
 ```
 **Validated builds:**
 
-- [ ] miking-alpine (amd64 / x86_64)
-- [ ] miking-alpine (arm64 / M1 Mac)
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:alpine12.6 (x86_64)
+- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:alpine12.6 (x86_64)
+- [ ] miking-dppl:alpine12.6 (aarch64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated x86_64 Tests: (On separate machine from build server.)**
+
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:alpine12.6 (x86_64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:alpine12.6 (x86_64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated ARM64 Mac Tests:**
+
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:alpine12.6 (aarch64)
 
 **Validated GPU tests:**
 
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] test-cuda (x86_64)
 ```
 
 It should look like this when formatted by GitHub:
 
 **Validated builds:**
 
-- [ ] miking-alpine (amd64 / x86_64)
-- [ ] miking-alpine (arm64 / M1 Mac)
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:alpine12.6 (x86_64)
+- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:alpine12.6 (x86_64)
+- [ ] miking-dppl:alpine12.6 (aarch64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated x86_64 Tests: (On separate machine from build server.)**
+
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:alpine12.6 (x86_64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:alpine12.6 (x86_64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated ARM64 Mac Tests:**
+
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:alpine12.6 (aarch64)
 
 **Validated GPU tests:**
 
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] test-cuda (x86_64)
 
 Tick each box under "Validated builds" once the build is validated. A build is
 validated when the miking image successfully builds with all tests passing. If
