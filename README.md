@@ -24,6 +24,7 @@ The following dependencies are needed to build the docker images:
 
 * `docker` or `podman`
 * `make`
+* `python3`
 
 **If using podman**, make sure that the environment variable `CONTAINER_RUNTIME` is
 set to `podman`. Before running any of the commands below, the easiest approach

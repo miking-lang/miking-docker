@@ -151,7 +151,6 @@ build-baseline:
 	$(CMD_BUILD) \
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
-	    --progress=plain \
 	    --platform="$(PLATFORM)" \
 	    $(shell ./baselines/conf.py build-args --platform=$(PLATFORM) --baseline=$(BASELINE)) \
 	    --file "$(DOCKERFILE)" \
@@ -198,7 +197,6 @@ build-miking:
 	$(CMD_BUILD) \
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
-	    --progress=plain \
 	    --platform="$(PLATFORM)" \
 	    --build-arg="BASELINE_IMAGE=$(BASELINE_TAG)" \
 	    --build-arg="MIKING_GIT_REMOTE=$(MIKING_GIT_REMOTE)" \
@@ -247,7 +245,6 @@ build-miking-dppl:
 	$(CMD_BUILD) \
 	    --tag "$(IMAGE_TAG)" \
 	    --force-rm \
-	    --progress=plain \
 	    --platform="$(PLATFORM)" \
 	    --build-arg="MIKING_IMAGE=$(MIKING_TAG)" \
 	    --build-arg="MIKING_DPPL_GIT_REMOTE=$(MIKING_DPPL_GIT_REMOTE)" \
