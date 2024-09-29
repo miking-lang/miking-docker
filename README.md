@@ -141,6 +141,20 @@ make build-baseline-all-linux/amd64 \
      build-miking-dppl-all-linux/arm64
 ```
 
+### Build All Images in Parallel (Experimental)
+There is experimental support for building images in parallel. This can be
+performed by running either
+```sh
+# If we also need to build a new baseline
+make seqbuild-from-baseline-all
+```
+
+or
+
+```sh
+# If we will reuse an existing baseline
+seqbuild-from-miking-all
+```
 
 ## Pushing to Docker Hub
 
@@ -304,4 +318,7 @@ It should look like this when formatted by GitHub:
 
 - [ ] test-cuda (x86_64)
 
-Tick each box under "Validated builds" once the build is validated. A build is validated when the miking image successfully builds with all tests passing. If an image is also listed under "Validated Special Tests", the Makefile-rule with the same name as the test must successfully be run before ticking the box.
+Tick each box under "Validated builds" once the build is validated. A build is
+validated when the miking image successfully builds with all tests passing. If
+an image is also listed under "Validated Special Tests", the Makefile-rule with
+the same name as the test must successfully be run before ticking the box.
