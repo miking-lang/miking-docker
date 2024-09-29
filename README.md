@@ -25,6 +25,7 @@ The following dependencies are needed to build the docker images:
 * `docker` or `podman`
 * `make`
 * `python3`
+* `bash`
 
 **If using podman**, make sure that the environment variable `CONTAINER_RUNTIME` is
 set to `podman`. Before running any of the commands below, the easiest approach
@@ -299,12 +300,8 @@ It should look like this when formatted by GitHub:
 - [ ] miking-dppl:alpine3.20 (aarch64)
 - [ ] miking-dppl:alpine12.6 (aarch64)
 
-**Validated GPU tests:**
+**Validated Special Tests:**
 
 - [ ] test-cuda (x86_64)
 
-Tick each box under "Validated builds" once the build is validated. A build is
-validated when the miking image successfully builds with all tests passing. If
-an image is also listed under "Validated GPU tests", the command
-`make -C <DIR> test-gpu/<arch>` must also be run which runs additional tests
-with a GPU. Tick the box if and only if this test has also succeeded.
+Tick each box under "Validated builds" once the build is validated. A build is validated when the miking image successfully builds with all tests passing. If an image is also listed under "Validated Special Tests", the Makefile-rule with the same name as the test must successfully be run before ticking the box.

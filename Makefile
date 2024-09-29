@@ -30,10 +30,10 @@ IMAGENAME_MIKING_DPPL = mikinglang/miking-dppl
 BUILD_LOGDIR = _logs
 
 MIKING_GIT_REMOTE = https://github.com/miking-lang/miking.git
-MIKING_GIT_COMMIT = fdce4618293c562bb56eb01028bb4db3358a5ddf
+MIKING_GIT_COMMIT = c36fcc7cf8bae3f2352cc6500a9940b6e8c97476
 
 MIKING_DPPL_GIT_REMOTE = https://github.com/miking-lang/miking-dppl.git
-MIKING_DPPL_GIT_COMMIT = 960519a6afd2f6edd50a5c5b6f404314c732d0a3
+MIKING_DPPL_GIT_COMMIT = 6bad5a74da2538a6d014ee47796dbf298f1a575c
 
 VALIDATE_PLATFORM_SCRIPT = ./scripts/validate_platform.py
 VALIDATE_IMAGE_SCRIPT    = ./scripts/validate_image.py
@@ -80,11 +80,6 @@ endef
 
 %-all-linux/arm64:
 	$(foreach be, $(BASELINES_ARM64), make $* BASELINE=$(be) PLATFORM=linux/arm64 ${FOREACH_NEWLINE})
-
-# TODO:
-#  - This is highly experimental, but would allow to build images in parallel.
-%-parallel-linux/amd64:
-	parallel --tagstring "{}:" --line-buffer make $* PLATFORM=linux/amd64 BASELINE={} ::: $(BASELINES_AMD64)
 
 # Sequential builds. If baseline is unchanged, it is only necessary to run the
 # `seqbuild-from-miking` rule.
