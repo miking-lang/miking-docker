@@ -253,14 +253,48 @@ build-miking-dppl:
 	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --platform="$(PLATFORM)" --runtime="$(CONTAINER_RUNTIME)"
 
 
+# Provide the image and target with
+#    IMAGENAME=name
+#    IMAGEVERSION=name
+#    BASELINE=name
+#    PLATFORM=platform
+#    TEST_CMD=command
+test-image:
+	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
+	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
+	$(eval IMAGE_TAG := $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
+	$(eval LOGFILE := $(BUILD_LOGDIR)/$(shell date "+test_$(subst :,-,$(subst /,-,$(IMAGE_TAG)))_%Y-%m-%d_%H.%M.%S.log"))
+
+	@if [[ -z "$(IMAGENAME)" ]]; then echo -e "\033[1;31mERROR:\033[0m Missing IMAGENAME variable"; exit 1; fi
+	@if [[ -z "$(IMAGEVERSION)" ]]; then echo -e "\033[1;31mERROR:\033[0m Missing IMAGEVERSION variable"; exit 1; fi
+	@if [[ -z "$(BASELINE)" ]]; then echo -e "\033[1;31mERROR:\033[0m Missing BASELINE variable"; exit 1; fi
+	@if [[ -z "$(PLATFORM)" ]]; then echo -e "\033[1;31mERROR:\033[0m Missing PLATFORM variable"; exit 1; fi
+
+	@echo -e "\033[4;36mBuild variables:\033[0m"
+	@echo -e " - \033[1;36mruntime:     \033[0m $(CONTAINER_RUNTIME)"
+	@echo -e " - \033[1;36mbaseline:    \033[0m $(BASELINE)"
+	@echo -e " - \033[1;36mplatform:    \033[0m $(PLATFORM)"
+	@echo -e " - \033[1;36mimage tag:   \033[0m $(IMAGE_TAG)"
+	@echo -e " - \033[1;36mcommand:     \033[0m $(TEST_CMD)"
+	@echo -e " - \033[1;36muid:         \033[0m $(UID)"
+	@echo -e " - \033[1;36mgid:         \033[0m $(GID)"
+	@echo -e " - \033[1;36mlogfile:     \033[0m $(LOGFILE)"
+
+	mkdir -p $(BUILD_LOGDIR)
+	touch $(LOGFILE)
+	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
+
+	$(CMD_RUN) --rm $(IMAGE_TAG) $(TEST_CMD) | tee -a $(LOGFILE)
+
+
 # Test all AMD64 images
 test-all-amd64:
 	@# Run miking tests
 	$(foreach be, $(BASELINES_AMD64), \
-          $(CMD_RUN) --rm $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64 make -C /src/miking install test-all test-sundials ${FOREACH_NEWLINE})
+          make test-image IMAGENAME=$(IMAGENAME_MIKING) IMAGEVERSION=$(VERSION_MIKING) BASELINE=$(be) PLATFORM=linux/amd64 TEST_CMD="make -C /src/miking install test-all test-sundials" ${FOREACH_NEWLINE})
 	@# Run miking-dppl tests
 	$(foreach be, $(BASELINES_AMD64), \
-          $(CMD_RUN) --rm $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64 make -C /src/miking install test ${FOREACH_NEWLINE})
+          make test-image IMAGENAME=$(IMAGENAME_MIKING_DPPL) IMAGEVERSION=$(VERSION_MIKING_DPPL) BASELINE=$(be) PLATFORM=linux/amd64 TEST_CMD="make -C /src/miking-dppl install test" ${FOREACH_NEWLINE})
 
 
 # Test all ARM64 images
@@ -270,7 +304,7 @@ test-all-arm64:
           $(CMD_RUN) --rm $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64 make -C /src/miking install test-all test-sundials ${FOREACH_NEWLINE})
 	@# Run miking-dppl tests
 	$(foreach be, $(BASELINES_ARM64), \
-          $(CMD_RUN) --rm $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64 make -C /src/miking install test ${FOREACH_NEWLINE})
+          $(CMD_RUN) --rm $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64 make -C /src/miking-dppl install test ${FOREACH_NEWLINE})
 
 
 # Test GPU functionality with Miking's CUDA image
