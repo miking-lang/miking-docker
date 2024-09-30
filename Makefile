@@ -291,20 +291,40 @@ test-image:
 test-all-amd64:
 	@# Run miking tests
 	$(foreach be, $(BASELINES_AMD64), \
-          make test-image IMAGENAME=$(IMAGENAME_MIKING) IMAGEVERSION=$(VERSION_MIKING) BASELINE=$(be) PLATFORM=linux/amd64 TEST_CMD="make -C /src/miking install test-all test-sundials" ${FOREACH_NEWLINE})
+          make test-image IMAGENAME=$(IMAGENAME_MIKING) \
+                          IMAGEVERSION=$(VERSION_MIKING) \
+                          BASELINE=$(be) \
+                          PLATFORM=linux/amd64 \
+                          TEST_CMD="make -C /src/miking install test-all test-sundials" \
+         ${FOREACH_NEWLINE})
 	@# Run miking-dppl tests
 	$(foreach be, $(BASELINES_AMD64), \
-          make test-image IMAGENAME=$(IMAGENAME_MIKING_DPPL) IMAGEVERSION=$(VERSION_MIKING_DPPL) BASELINE=$(be) PLATFORM=linux/amd64 TEST_CMD="make -C /src/miking-dppl install test" ${FOREACH_NEWLINE})
+          make test-image IMAGENAME=$(IMAGENAME_MIKING_DPPL) \
+                          IMAGEVERSION=$(VERSION_MIKING_DPPL) \
+                          BASELINE=$(be) \
+                          PLATFORM=linux/amd64 \
+                          TEST_CMD="make -C /src/miking-dppl install test" \
+         ${FOREACH_NEWLINE})
 
 
 # Test all ARM64 images
 test-all-arm64:
 	@# Run miking tests
 	$(foreach be, $(BASELINES_ARM64), \
-          $(CMD_RUN) --rm $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64 make -C /src/miking install test-all test-sundials ${FOREACH_NEWLINE})
+          make test-image IMAGENAME=$(IMAGENAME_MIKING) \
+                          IMAGEVERSION=$(VERSION_MIKING) \
+                          BASELINE=$(be) \
+                          PLATFORM=linux/arm64 \
+                          TEST_CMD="make -C /src/miking install test-all test-sundials" \
+         ${FOREACH_NEWLINE})
 	@# Run miking-dppl tests
 	$(foreach be, $(BASELINES_ARM64), \
-          $(CMD_RUN) --rm $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64 make -C /src/miking-dppl install test ${FOREACH_NEWLINE})
+          make test-image IMAGENAME=$(IMAGENAME_MIKING_DPPL) \
+                          IMAGEVERSION=$(VERSION_MIKING_DPPL) \
+                          BASELINE=$(be) \
+                          PLATFORM=linux/arm64 \
+                          TEST_CMD="make -C /src/miking-dppl install test" \
+         ${FOREACH_NEWLINE})
 
 
 # Test GPU functionality with Miking's CUDA image
