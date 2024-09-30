@@ -263,6 +263,7 @@ build-miking-dppl:
 #    PLATFORM=platform
 #    TEST_CMD=command
 test-image:
+	$(eval TEST_RUN := $(CMD_RUN))
 	$(eval UID := $(shell if [[ -z "$$SUDO_UID" ]]; then id -u; else echo "$$SUDO_UID"; fi))
 	$(eval GID := $(shell if [[ -z "$$SUDO_GID" ]]; then id -g; else echo "$$SUDO_GID"; fi))
 	$(eval IMAGE_TAG := $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
@@ -287,7 +288,7 @@ test-image:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	$(CMD_RUN) --rm $(IMAGE_TAG) $(TEST_CMD) 2>&1 | tee -a $(LOGFILE)
+	$(TEST_RUN) --rm $(IMAGE_TAG) $(TEST_CMD) 2>&1 | tee -a $(LOGFILE)
 
 
 # Test all AMD64 images
@@ -336,6 +337,7 @@ test-cuda:
                         IMAGEVERSION=$(VERSION_MIKING) \
                         BASELINE=cuda11.4 \
                         PLATFORM=linux/amd64 \
+                        TEST_RUN="$(CMD_RUN_CUDA)" \
                         TEST_CMD="make -C /src/miking install test-accelerate"
 
 # Provide with
