@@ -12,11 +12,13 @@ CMD_BUILD    = docker build
 CMD_RUN      = docker run
 CMD_RUN_CUDA = docker run --gpus all
 CMD_PUSH_f   = docker push $1
+CMD_MANIFEST = docker manifest
 else
 CMD_BUILD    = podman build --format=docker
 CMD_RUN      = podman run
 CMD_RUN_CUDA = podman run --device nvidia.com/gpu=all
 CMD_PUSH_f   = podman push $1 docker://docker.io/$1
+CMD_MANIFEST = podman manifest
 endif
 
 SHELL = bash
@@ -52,6 +54,7 @@ print-variables:
 	@echo -e " - \033[1;36mCMD_RUN                  \033[0m= $(CMD_RUN)"
 	@echo -e " - \033[1;36mCMD_RUN_CUDA             \033[0m= $(CMD_RUN_CUDA)"
 	@echo -e " - \033[1;36mCMD_PUSH_f               \033[0m= $(call CMD_PUSH_f,<IMAGE_TAG>)"
+	@echo -e " - \033[1;36mCMD_MANIFEST             \033[0m= $(CMD_MANIFEST)"
 	@echo -e " - \033[1;36mSHELL                    \033[0m= $(SHELL)"
 	@echo -e " - \033[1;36mVERSION_BASELINE         \033[0m= $(VERSION_BASELINE)"
 	@echo -e " - \033[1;36mVERSION_MIKING           \033[0m= $(VERSION_MIKING)"
@@ -329,14 +332,11 @@ test-all-arm64:
 
 # Test GPU functionality with Miking's CUDA image
 test-cuda:
-	$(eval BASELINE := cuda11.4)
-	$(eval PLATFORM := linux/amd64)
-	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
-	$(CMD_RUN_CUDA) \
-	    --rm -it \
-	    $(MIKING_TAG) \
-	    make -C /src/miking install test-accelerate
-
+	make test-image IMAGENAME=$(IMAGENAME_MIKING) \
+                        IMAGEVERSION=$(VERSION_MIKING) \
+                        BASELINE=cuda11.4 \
+                        PLATFORM=linux/amd64 \
+                        TEST_CMD="make -C /src/miking install test-accelerate"
 
 # Provide with
 #    BASELINE=name
@@ -405,13 +405,33 @@ push-miking-dppl:
 	make push IMAGENAME=$(IMAGENAME_MIKING_DPPL) IMAGEVERSION=$(VERSION_MIKING_DPPL)
 
 # TODO: Convert these functions to work with the new setup
-#push:
-#	@echo -e "\033[1;31mSpecify the platform you are pushing for with \033[1;37mmake push/<arch>\033[0m"
-#
-#push/%:
-#	$(VALIDATE_ARCH_SCRIPT) $*
-#	docker push $(IMAGENAME):$(VERSION)-$*
-#
+
+# This should create, for each baseline
+#   miking:dev12-baseline
+#   miking-dppl:dev1-baseline
+#   miking:latest-baseline
+#   miking-dppl:latest-baseline
+# And implicitly
+#   miking:dev12
+#   miking-dppl:dev1
+#   miking:latest
+#   miking-dppl:latest
+push-manifests:
+	$(eval MIKING_AMENDMENTS := \
+		$(foreach be, $(BASELINES_AMD64), \
+		  --amend $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64) \
+		$(foreach be, $(BASELINES_ARM64), \
+		  --amend $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-arm64))
+	$(eval MIKING_DPPL_AMENDMENTS := \
+		$(foreach be, $(BASELINES_AMD64), \
+		  --amend $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64) \
+		$(foreach be, $(BASELINES_ARM64), \
+		  --amend $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-arm64))
+
+	@echo $(MIKING_AMENDMENTS)
+	@echo $(MIKING_DPPL_AMENDMENTS)
+	@echo "TODO"
+
 #push-manifests:
 #	$(eval AMENDMENTS := $(shell \
 #	  if [[ "$(VERSION_SUFFIX)" == "alpine" ]]; then \

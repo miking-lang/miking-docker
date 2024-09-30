@@ -257,30 +257,30 @@ been validated for. Copy paste this checklist to your PR description:
 
 - [ ] miking:alpine3.20 (x86_64)
 - [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:alpine12.6 (x86_64)
-- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:debian12.6 (aarch64)
 - [ ] miking:cuda11.4 (x86_64)
 - [ ] miking-dppl:alpine3.20 (x86_64)
 - [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:alpine12.6 (x86_64)
-- [ ] miking-dppl:alpine12.6 (aarch64)
+- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:debian12.6 (aarch64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
 - [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:alpine12.6 (x86_64)
+- [ ] miking:debian12.6 (x86_64)
 - [ ] miking:cuda11.4 (x86_64)
 - [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:alpine12.6 (x86_64)
+- [ ] miking-dppl:debian12.6 (x86_64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
 - [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking:debian12.6 (aarch64)
 - [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:alpine12.6 (aarch64)
+- [ ] miking-dppl:debian12.6 (aarch64)
 
 **Validated GPU tests:**
 
@@ -293,30 +293,30 @@ It should look like this when formatted by GitHub:
 
 - [ ] miking:alpine3.20 (x86_64)
 - [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:alpine12.6 (x86_64)
-- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:debian12.6 (aarch64)
 - [ ] miking:cuda11.4 (x86_64)
 - [ ] miking-dppl:alpine3.20 (x86_64)
 - [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:alpine12.6 (x86_64)
-- [ ] miking-dppl:alpine12.6 (aarch64)
+- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:debian12.6 (aarch64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
 - [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:alpine12.6 (x86_64)
+- [ ] miking:debian12.6 (x86_64)
 - [ ] miking:cuda11.4 (x86_64)
 - [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:alpine12.6 (x86_64)
+- [ ] miking-dppl:debian12.6 (x86_64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
 - [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:alpine12.6 (aarch64)
+- [ ] miking:debian12.6 (aarch64)
 - [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:alpine12.6 (aarch64)
+- [ ] miking-dppl:debian12.6 (aarch64)
 
 **Validated Special Tests:**
 
