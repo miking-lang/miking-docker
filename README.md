@@ -156,6 +156,9 @@ or
 seqbuild-from-miking-all
 ```
 
+This will take a lot of resources (CPU and RAM), and may overload the container
+build system.
+
 ## Pushing to Docker Hub
 
 These instructions concerns the pushing of images to Docker Hub. If you are a
