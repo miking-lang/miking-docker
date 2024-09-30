@@ -287,7 +287,7 @@ test-image:
 	touch $(LOGFILE)
 	chown $(UID):$(GID) $(BUILD_LOGDIR) $(LOGFILE)
 
-	$(CMD_RUN) --rm $(IMAGE_TAG) $(TEST_CMD) | tee -a $(LOGFILE)
+	$(CMD_RUN) --rm $(IMAGE_TAG) $(TEST_CMD) 2>&1 | tee -a $(LOGFILE)
 
 
 # Test all AMD64 images
