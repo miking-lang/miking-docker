@@ -11,10 +11,12 @@ ifeq ($(CONTAINER_RUNTIME),docker)
 CMD_BUILD    = docker build
 CMD_RUN      = docker run
 CMD_RUN_CUDA = docker run --gpus all
+CMD_PUSH_f   = docker push $1
 else
 CMD_BUILD    = podman build --format=docker
 CMD_RUN      = podman run
 CMD_RUN_CUDA = podman run --device nvidia.com/gpu=all
+CMD_PUSH_f   = podman push $1 docker://docker.io/$1
 endif
 
 SHELL = bash
@@ -49,6 +51,7 @@ print-variables:
 	@echo -e " - \033[1;36mCMD_BUILD                \033[0m= $(CMD_BUILD)"
 	@echo -e " - \033[1;36mCMD_RUN                  \033[0m= $(CMD_RUN)"
 	@echo -e " - \033[1;36mCMD_RUN_CUDA             \033[0m= $(CMD_RUN_CUDA)"
+	@echo -e " - \033[1;36mCMD_PUSH_f               \033[0m= $(call CMD_PUSH_f,<IMAGE_TAG>)"
 	@echo -e " - \033[1;36mSHELL                    \033[0m= $(SHELL)"
 	@echo -e " - \033[1;36mVERSION_BASELINE         \033[0m= $(VERSION_BASELINE)"
 	@echo -e " - \033[1;36mVERSION_MIKING           \033[0m= $(VERSION_MIKING)"
@@ -285,6 +288,47 @@ manifest-miking:
 	exit 1
 
 
+# Provide the image and target with
+#    IMAGENAME=name
+#    IMAGEVERSION=name
+#    BASELINE=name
+#    PLATFORM=platform
+push:
+	$(eval IMAGE_TAG := $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
+
+	@if [[ -z "$(IMAGENAME)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Imagename not provided (provide with IMAGENAME=imagename)"; \
+	     exit 1; \
+	 fi
+	@if [[ -z "$(IMAGEVERSION)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Image version not provided (provide with IMAGEVERSION=ver)"; \
+	     exit 1; \
+	 fi
+	@if [[ -z "$(BASELINE)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Baseline not provided (provide with BASELINE=name)"; \
+	     exit 1; \
+	 fi
+	@if [[ -z "$(PLATFORM)" ]]; then \
+	     echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)"; \
+	     exit 1; \
+	 fi
+
+	@echo -e "\033[4;36mBuild variables:\033[0m"
+	@echo -e " - \033[1;36mruntime:    \033[0m$(CONTAINER_RUNTIME)"
+	@echo -e " - \033[1;36mbaseline:   \033[0m$(BASELINE)"
+	@echo -e " - \033[1;36mplatform:   \033[0m$(PLATFORM)"
+	@echo -e " - \033[1;36mimage tag:  \033[0m$(IMAGE_TAG)"
+
+	$(call CMD_PUSH_f,$(IMAGE_TAG))
+
+push-baseline:
+	make push IMAGENAME=$(IMAGENAME_BASELINE) IMAGEVERSION=$(VERSION_BASELINE)
+
+push-miking:
+	make push IMAGENAME=$(IMAGENAME_MIKING) IMAGEVERSION=$(VERSION_MIKING)
+
+push-miking-dppl:
+	make push IMAGENAME=$(IMAGENAME_MIKING_DPPL) IMAGEVERSION=$(VERSION_MIKING_DPPL)
 
 # TODO: Convert these functions to work with the new setup
 #push:
