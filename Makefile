@@ -253,6 +253,26 @@ build-miking-dppl:
 	$(VALIDATE_IMAGE_SCRIPT) "$(IMAGE_TAG)" --platform="$(PLATFORM)" --runtime="$(CONTAINER_RUNTIME)"
 
 
+# Test all AMD64 images
+test-all-amd64:
+	@# Run miking tests
+	$(foreach be, $(BASELINES_AMD64), \
+          $(CMD_RUN) --rm $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64 make -C /src/miking install test-all test-sundials ${FOREACH_NEWLINE})
+	@# Run miking-dppl tests
+	$(foreach be, $(BASELINES_AMD64), \
+          $(CMD_RUN) --rm $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64 make -C /src/miking install test ${FOREACH_NEWLINE})
+
+
+# Test all ARM64 images
+test-all-arm64:
+	@# Run miking tests
+	$(foreach be, $(BASELINES_ARM64), \
+          $(CMD_RUN) --rm $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64 make -C /src/miking install test-all test-sundials ${FOREACH_NEWLINE})
+	@# Run miking-dppl tests
+	$(foreach be, $(BASELINES_ARM64), \
+          $(CMD_RUN) --rm $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64 make -C /src/miking install test ${FOREACH_NEWLINE})
+
+
 # Test GPU functionality with Miking's CUDA image
 test-cuda:
 	$(eval BASELINE := cuda11.4)

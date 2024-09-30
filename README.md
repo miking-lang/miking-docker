@@ -70,7 +70,7 @@ to build for as well as the baseline it should be based on. The command to
 build an image follow this format:
 
 ```sh
-make build-<image> ARCH=<os/arch> BASELINE=<baseline>
+make build-<image> PLATFORM=<os/arch> BASELINE=<baseline>
 ```
 
 Run `print-variables` to see which baselines that are available for any given
@@ -83,7 +83,7 @@ Using the `debian12.6` baseline for x86_64 as an example, we build it by
 running:
 
 ```sh
-make build-baseline ARCH=linux/amd64 BASELINE=debian12.6
+make build-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
 This will create the `mikinglang/baseline:<ver>-debian12.6-linux-amd64` image.
@@ -95,7 +95,7 @@ After the baseline image has been built, the `miking` image can now be built
 by:
 
 ```sh
-make build-miking ARCH=linux/amd64 BASELINE=debian12.6
+make build-miking PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
 This will create the versioned image
@@ -108,7 +108,7 @@ After the `miking` image has been built, the `miking-dppl` image can now be
 built by:
 
 ```sh
-make build-miking-dppl ARCH=linux/amd64 BASELINE=debian12.6
+make build-miking-dppl PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
 This will create the versioned image
@@ -172,8 +172,8 @@ Sticking with the example of `debian12.6` for `linux/amd64`, push the build
 images to Docker Hub by running:
 
 ```sh
-make push-baseline ARCH=linux/amd64 BASELINE=debian12.6
-make push-miking   ARCH=linux/amd64 BASELINE=debian12.6
+make push-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
+make push-miking   PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
 The primary reason for pushing baseline images is to avoid having to recreate
@@ -326,3 +326,25 @@ Tick each box under "Validated builds" once the build is validated. A build is
 validated when the miking image successfully builds with all tests passing. If
 an image is also listed under "Validated Special Tests", the Makefile-rule with
 the same name as the test must successfully be run before ticking the box.
+
+### Commands for Validating Tests
+Use these commands to validate tests.
+
+```sh
+# Validate `miking` image
+docker run --rm mikinglang/miking:<miking tag> make -C /src/miking install test-all test-sundials
+
+# Validate `miking-dppl` image
+docker run --rm mikinglang/miking:<dppl tag> make -C /src/miking install make
+
+# Set CONTAINER_RUNTIME for before running any of the makefile rules below
+
+# Validate test-cuda (requires that you are located in a Miking DPPL repostitory)
+make test-cuda
+
+# Convenience for validating all AMD64 tests
+make test-all-amd64
+
+# Convenience for validating all ARM64 tests
+make test-all-arm64
+```
