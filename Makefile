@@ -45,6 +45,8 @@ VALIDATE_IMAGE_SCRIPT    = ./scripts/validate_image.py
 BASELINES_AMD64 = alpine3.20 debian12.6 cuda11.4
 BASELINES_ARM64 = alpine3.20 debian12.6
 
+BASELINES_ALL = $(shell echo $(BASELINES_AMD64) $(BASELINES_ARM64) | tr ' ' '\n' | sort | uniq)
+
 BASELINE_IMPLICIT = debian12.6
 
 print-variables:
@@ -66,6 +68,7 @@ print-variables:
 	@echo -e " - \033[1;36mMIKING_DPPL_GIT_COMMIT   \033[0m= $(MIKING_DPPL_GIT_COMMIT)"
 	@echo -e " - \033[1;36mVALIDATE_PLATFORM_SCRIPT \033[0m= $(VALIDATE_PLATFORM_SCRIPT)"
 	@echo -e " - \033[1;36mVALIDATE_IMAGE_SCRIPT    \033[0m= $(VALIDATE_IMAGE_SCRIPT)"
+	@echo -e " - \033[1;36mBASELINES_ALL            \033[0m= $(BASELINES_ALL)"
 	@echo -e " - \033[1;36mBASELINES_AMD64          \033[0m= $(BASELINES_AMD64)"
 	@echo -e " - \033[1;36mBASELINES_ARM64          \033[0m= $(BASELINES_ARM64)"
 	@echo -e " - \033[1;36mBASELINE_IMPLICIT        \033[0m= $(BASELINE_IMPLICIT)"
@@ -219,14 +222,8 @@ build-miking-dppl:
 	$(eval MIKING_TAG := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 	$(eval IMAGE_TAG := $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 
-	@if [[ -z "$(BASELINE)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
-	     exit 1; \
-	 fi
-	@if [[ -z "$(PLATFORM)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)"; \
-	     exit 1; \
-	 fi
+	@if [[ -z "$(BASELINE)" ]]; then echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; 	     exit 1; fi
+	@if [[ -z "$(PLATFORM)" ]]; then echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)"; 	     exit 1; fi
 
 	@echo -e "\033[4;36mBuild variables:\033[0m"
 	@echo -e " - \033[1;36mruntime:     \033[0m $(CONTAINER_RUNTIME)"
@@ -340,29 +337,6 @@ test-cuda:
                         TEST_RUN="$(CMD_RUN_CUDA)" \
                         TEST_CMD="make -C /src/miking install test-accelerate"
 
-# Provide with
-#    BASELINE=name
-manifest-miking:
-	$(eval MIKING_TAG_NOARCH := $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(BASELINE))
-	$(eval AMENDMENTS := $(shell \
-	  if echo "$(BASELINES_AMD64)" | grep -w -q "$(BASELINE)"; then \
-	    echo "--amend $(MIKING_TAG_NOARCH)-linux-amd64"; \
-	  fi; \
-	  if echo "$(BASELINES_ARM64)" | grep -w -q "$(BASELINE)"; then \
-	    echo "--amend $(MIKING_TAG_NOARCH)-linux-arm64"; \
-	  fi   \
-	 ))
-
-	@if [[ -z "$(BASELINE)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Image not provided (provide with BASELINE=name)"; \
-	     exit 1; \
-	 fi
-
-	@echo $(AMENDMENTS)
-
-	echo "TODO"
-	exit 1
-
 
 # Provide the image and target with
 #    IMAGENAME=name
@@ -372,22 +346,10 @@ manifest-miking:
 push:
 	$(eval IMAGE_TAG := $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE)-$(subst /,-,$(PLATFORM)))
 
-	@if [[ -z "$(IMAGENAME)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Imagename not provided (provide with IMAGENAME=imagename)"; \
-	     exit 1; \
-	 fi
-	@if [[ -z "$(IMAGEVERSION)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Image version not provided (provide with IMAGEVERSION=ver)"; \
-	     exit 1; \
-	 fi
-	@if [[ -z "$(BASELINE)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Baseline not provided (provide with BASELINE=name)"; \
-	     exit 1; \
-	 fi
-	@if [[ -z "$(PLATFORM)" ]]; then \
-	     echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)"; \
-	     exit 1; \
-	 fi
+	@if [[ -z "$(IMAGENAME)" ]];    then echo -e "\033[1;31mERROR:\033[0m Imagename not provided (provide with IMAGENAME=imagename)";  exit 1; fi
+	@if [[ -z "$(IMAGEVERSION)" ]]; then echo -e "\033[1;31mERROR:\033[0m Image version not provided (provide with IMAGEVERSION=ver)"; exit 1; fi
+	@if [[ -z "$(BASELINE)" ]];     then echo -e "\033[1;31mERROR:\033[0m Baseline not provided (provide with BASELINE=name)";         exit 1; fi
+	@if [[ -z "$(PLATFORM)" ]];     then echo -e "\033[1;31mERROR:\033[0m Platform not provided (provide with PLATFORM=platform)";     exit 1; fi
 
 	@echo -e "\033[4;36mBuild variables:\033[0m"
 	@echo -e " - \033[1;36mruntime:    \033[0m$(CONTAINER_RUNTIME)"
@@ -406,33 +368,57 @@ push-miking:
 push-miking-dppl:
 	make push IMAGENAME=$(IMAGENAME_MIKING_DPPL) IMAGEVERSION=$(VERSION_MIKING_DPPL)
 
-# TODO: Convert these functions to work with the new setup
 
-# This should create, for each baseline
-#   miking:dev12-baseline
-#   miking-dppl:dev1-baseline
-#   miking:latest-baseline
-#   miking-dppl:latest-baseline
-# And implicitly
-#   miking:dev12
-#   miking-dppl:dev1
-#   miking:latest
-#   miking-dppl:latest
-push-manifests:
-	$(eval MIKING_AMENDMENTS := \
-		$(foreach be, $(BASELINES_AMD64), \
-		  --amend $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-amd64) \
-		$(foreach be, $(BASELINES_ARM64), \
-		  --amend $(IMAGENAME_MIKING):$(VERSION_MIKING)-$(be)-linux-arm64))
-	$(eval MIKING_DPPL_AMENDMENTS := \
-		$(foreach be, $(BASELINES_AMD64), \
-		  --amend $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-amd64) \
-		$(foreach be, $(BASELINES_ARM64), \
-		  --amend $(IMAGENAME_MIKING_DPPL):$(VERSION_MIKING_DPPL)-$(be)-linux-arm64))
+# Provide the image and target with
+#    IMAGENAME=name
+#    IMAGEVERSION=name
+#    BASELINE=name
+push-manifest:
+	$(eval IMAGE_TAG := $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE))
+	$(eval AMENDMENTS := $(shell \
+	  if echo "$(BASELINES_AMD64)" | grep -w -q "$(BASELINE)"; then \
+	    echo "--amend $(IMAGE_TAG)-linux-amd64"; \
+	  fi; \
+	  if echo "$(BASELINES_ARM64)" | grep -w -q "$(BASELINE)"; then \
+	    echo "--amend $(IMAGE_TAG)-linux-arm64"; \
+	  fi   \
+	 ))
 
-	@echo $(MIKING_AMENDMENTS)
-	@echo $(MIKING_DPPL_AMENDMENTS)
-	@echo "TODO"
+	@if [[ -z "$(IMAGENAME)" ]];    then echo -e "\033[1;31mERROR:\033[0m Missing IMAGENAME variable";    exit 1; fi
+	@if [[ -z "$(IMAGEVERSION)" ]]; then echo -e "\033[1;31mERROR:\033[0m Missing IMAGEVERSION variable"; exit 1; fi
+	@if [[ -z "$(BASELINE)" ]];     then echo -e "\033[1;31mERROR:\033[0m Missing BASELINE variable";     exit 1; fi
+
+	@# Using the || true since there is no -f option to `manifest rm`
+	$(CMD_MANIFEST) rm $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE) || true
+	$(CMD_MANIFEST) rm $(IMAGENAME):latest-$(BASELINE)          || true
+	$(CMD_MANIFEST) create $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE) $(AMENDMENTS)
+	$(CMD_MANIFEST) create $(IMAGENAME):latest-$(BASELINE)          $(AMENDMENTS)
+	$(CMD_MANIFEST) push --purge $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE)
+	$(CMD_MANIFEST) push --purge $(IMAGENAME):latest-$(BASELINE)
+ifeq ($(BASELINE),$(BASELINE_IMPLICIT))
+	$(CMD_MANIFEST) rm $(IMAGENAME):$(IMAGEVERSION) || true
+	$(CMD_MANIFEST) rm $(IMAGENAME):latest          || true
+	$(CMD_MANIFEST) create $(IMAGENAME):$(IMAGEVERSION) $(AMENDMENTS)
+	$(CMD_MANIFEST) create $(IMAGENAME):latest          $(AMENDMENTS)
+	$(CMD_MANIFEST) push --purge $(IMAGENAME):$(IMAGEVERSION)
+	$(CMD_MANIFEST) push --purge $(IMAGENAME):latest
+endif
+
+push-manifests-miking:
+	@# Push miking manifests
+	$(foreach be, $(BASELINES_ALL), \
+          make push-manifest IMAGENAME=$(IMAGENAME_MIKING) \
+                             IMAGEVERSION=$(VERSION_MIKING) \
+                             BASELINE=$(be) \
+         ${FOREACH_NEWLINE})
+
+push-manifests-miking-dppl:
+	@# Push miking-dppl manifests
+	$(foreach be, $(BASELINES_ALL), \
+          make push-manifest IMAGENAME=$(IMAGENAME_MIKING_DPPL) \
+                             IMAGEVERSION=$(VERSION_MIKING_DPPL) \
+                             BASELINE=$(be) \
+         ${FOREACH_NEWLINE})
 
 #push-manifests:
 #	$(eval AMENDMENTS := $(shell \
