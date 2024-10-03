@@ -8,17 +8,19 @@
 CONTAINER_RUNTIME ?= docker
 
 ifeq ($(CONTAINER_RUNTIME),docker)
-CMD_BUILD    = docker build
-CMD_RUN      = docker run
-CMD_RUN_CUDA = docker run --gpus all
-CMD_PUSH_f   = docker push $1
-CMD_MANIFEST = docker manifest
+CMD_BUILD           = docker build
+CMD_RUN             = docker run
+CMD_RUN_CUDA        = docker run --gpus all
+CMD_PUSH_f          = docker push $1
+CMD_MANIFEST        = docker manifest
+CMD_MANIFEST_PUSH_f = docker manifest push --purge $1
 else
-CMD_BUILD    = podman build --format=docker
-CMD_RUN      = podman run
-CMD_RUN_CUDA = podman run --device nvidia.com/gpu=all
-CMD_PUSH_f   = podman push $1 docker://docker.io/$1
-CMD_MANIFEST = podman manifest
+CMD_BUILD           = podman build --format=docker
+CMD_RUN             = podman run
+CMD_RUN_CUDA        = podman run --device nvidia.com/gpu=all
+CMD_PUSH_f          = podman push $1 docker://docker.io/$1
+CMD_MANIFEST        = podman manifest
+CMD_MANIFEST_PUSH_f = podman manifest push --rm $1 docker://docker.io/$1
 endif
 
 SHELL = bash
@@ -57,6 +59,7 @@ print-variables:
 	@echo -e " - \033[1;36mCMD_RUN_CUDA             \033[0m= $(CMD_RUN_CUDA)"
 	@echo -e " - \033[1;36mCMD_PUSH_f               \033[0m= $(call CMD_PUSH_f,<IMAGE_TAG>)"
 	@echo -e " - \033[1;36mCMD_MANIFEST             \033[0m= $(CMD_MANIFEST)"
+	@echo -e " - \033[1;36mCMD_MANIFEST_PUSH_f      \033[0m= $(call CMD_MANIFEST_PUSH_f,<MANIFEST_TAG>)"
 	@echo -e " - \033[1;36mSHELL                    \033[0m= $(SHELL)"
 	@echo -e " - \033[1;36mVERSION_BASELINE         \033[0m= $(VERSION_BASELINE)"
 	@echo -e " - \033[1;36mVERSION_MIKING           \033[0m= $(VERSION_MIKING)"
@@ -393,15 +396,15 @@ push-manifest:
 	$(CMD_MANIFEST) rm $(IMAGENAME):latest-$(BASELINE)          || true
 	$(CMD_MANIFEST) create $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE) $(AMENDMENTS)
 	$(CMD_MANIFEST) create $(IMAGENAME):latest-$(BASELINE)          $(AMENDMENTS)
-	$(CMD_MANIFEST) push --purge $(IMAGENAME):$(IMAGEVERSION)-$(BASELINE)
-	$(CMD_MANIFEST) push --purge $(IMAGENAME):latest-$(BASELINE)
+	$(call CMD_MANIFEST_PUSH_f,$(IMAGENAME):$(IMAGEVERSION)-$(BASELINE))
+	$(call CMD_MANIFEST_PUSH_f,$(IMAGENAME):latest-$(BASELINE))
 ifeq ($(BASELINE),$(BASELINE_IMPLICIT))
 	$(CMD_MANIFEST) rm $(IMAGENAME):$(IMAGEVERSION) || true
 	$(CMD_MANIFEST) rm $(IMAGENAME):latest          || true
 	$(CMD_MANIFEST) create $(IMAGENAME):$(IMAGEVERSION) $(AMENDMENTS)
 	$(CMD_MANIFEST) create $(IMAGENAME):latest          $(AMENDMENTS)
-	$(CMD_MANIFEST) push --purge $(IMAGENAME):$(IMAGEVERSION)
-	$(CMD_MANIFEST) push --purge $(IMAGENAME):latest
+	$(call CMD_MANIFEST_PUSH_f,$(IMAGENAME):$(IMAGEVERSION))
+	$(call CMD_MANIFEST_PUSH_f,$(IMAGENAME):latest)
 endif
 
 push-manifests-miking:
