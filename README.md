@@ -1,115 +1,212 @@
 # Miking Docker Images
-Docker Environment for compiling and running miking/mcore programs. Each kind
-of image is placed under its own directory.
+
+Docker images for compiling and running Miking/MCore programs. Produces images
+for a selected number of base images, located under the `baselines/` directory.
+The images produced by this repository are:
+
+ * `mikinglang/baseline`
+ * `mikinglang/miking`
+ * `mikinglang/miking-dppl`
+
+The baseline images contains all dependencies of Miking, excluding Miking
+itself. These are primarily used to avoid recompiling all dependencies on new
+releases of Miking, but they can also serve as a development environment for
+quickly getting started on tinkering with Miking.
 
 This readme contains development and build instructions only. For usage
 instructions, see the [Docker Hub README](docs/dockerhub-README.md) file in the
 `docs/` directory.
 
-## Build Dependencies
+
+### Build Dependencies
 
 The following dependencies are needed to build the docker images:
 
-* `docker` (with a running Docker deamon in the background)
+* `docker` or `podman`
 * `make`
-* `sudo`
+* `python3`
+* `bash`
 
-## CUDA Runtime Dependencies
+**If using podman**, make sure that the environment variable `CONTAINER_RUNTIME` is
+set to `podman`. Before running any of the commands below, the easiest approach
+is simply to export this variable by running:
+
+```sh
+export CONTAINER_RUNTIME=podman
+```
+
+**If using docker**, you have to prefix the commands below with `sudo` if you
+cannot execute docker as your regular user.
+
+
+### CUDA Runtime Dependencies
 
 See CUDA Runtime Dependencies section in the dockerhub README under `docs/`. It
-is still possible to build the miking-cuda image without CUDA installed on the
-host system.
+is still possible to build the cuda images without CUDA installed on the host
+system. Though the testing of the image has to be done on a system with CUDA.
 
-# Table of Contents
+
+## Table of Contents
 
  * [Build](#build)
-   * [Baseline Image](#baseline-image)
-   * [Miking Image](#miking-image)
+   * [Individual Baseline Image](#baseline-image)
+   * [Individual Miking Image](#miking-image)
+   * [Individual Miking DPPL Image](#miking-image)
+   * [All Images](#miking-image)
+   * [Build All Images in Parallel (Experimental)](#build-all-images-in-parallel-experimental)
+ * [Pushing to Docker Hub](#pushing-to-docker-hub)
+   * [Pushing Images](#pushing-images)
+   * [Pushing Manifests](#pushing-manifests)
  * [Running the Image](#running-the-image)
    * [Verify Compilation](#verify-compilation)
  * [Contributing](#contributing)
    * [Pull Requests](#pull-requests)
 
-# Build
 
-The images are configured to be built via makefiles. Build the image with its
-Dockerfile in the directory `<DIR>` by running the following in at the
-top-level of the repository (replacing `<arch>` by either amd64 or arm64):
+## Build
 
-```sh
-make -C <DIR> build/<arch>
-```
-
-Each miking image is based on a baseline image. **Before building a miking
-image, its corresponding baseline image has to be built.** If the correct
-baseline image already exists on Docker Hub, that can be pulled directly
-instead and you can skip the _Baseline Image_ step below.
-
-## Baseline Image
-
-Taking the alpine image as an example, before building the `miking-alpine`
-image, the matching `baseline-alpine` image has to be built first. Build it
-for amd64/x86_64 by running make on its directory:
+When building an image, you always provide the hardware architecture you want
+to build for as well as the baseline it should be based on. The command to
+build an image follow this format:
 
 ```sh
-make -C baseline-alpine build/amd64
+make build-<image> PLATFORM=<os/arch> BASELINE=<baseline>
 ```
 
-This will create baseline image `mikinglang/baseline:<basever>-alpine-amd64`
-which contains all the necessary dependencies to build the miking compiler, but
-not the compiler itself. The `<arch>` part is necessary to specify some
-compiler options for certain dependencies.
+Run `print-variables` to see which baselines that are available for any given
+hardware architecture.
 
-This should then be pushed to Docker Hub. Do that by running the `push/<arch>`
-command for that image:
+
+### Individual Baseline Image
+
+Using the `debian12.6` baseline for x86_64 as an example, we build it by
+running:
 
 ```sh
-make -C baseline-alpine push/amd64
+make build-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
-## Miking Image
+This will create the `mikinglang/baseline:<ver>-debian12.6-linux-amd64` image.
 
-After the baseline image has been built, the `miking-alpine` image can now be
-built by running make on its directory:
+
+### Individual Miking Image
+
+After the baseline image has been built, the `miking` image can now be built
+by:
 
 ```sh
-make -C miking-alpine build/amd64
+make build-miking PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
-This will create the versioned image `mikinglang/miking:<miver>-alpine-amd64`.
-This image can then be used directly, or pushed up to Docker Hub. To push it up
-to Docker Hub, make sure that you have push access to the mikinglang repository
-and then run the make rule (replace `amd64` with the architecture of your
-platform):
+This will create the versioned image
+`mikinglang/miking:<miver>-debian12.6-linux-amd64`.
+
+
+### Individual Miking DPPL Image
+
+After the `miking` image has been built, the `miking-dppl` image can now be
+built by:
 
 ```sh
-make -C miking-alpine push/amd64
+make build-miking-dppl PLATFORM=linux/amd64 BASELINE=debian12.6
 ```
 
-Each image should be built for the following architectures:
+This will create the versioned image
+`mikinglang/miking-dppl:<dpplver>-debian12.6-linux-amd64`.
 
- * miking-alpine: `amd64`, `arm64`
- * miking-cuda: `amd64`
+
+### All Images
+
+For convenience, a collection of make rules are provided to build images for
+all baselines. These commands usually take a long time to run, so it is
+recommended to spawn them with `nohup <cmd> &` and go do something else while
+they are running.
+
+To build all images for all baselines, run the corresponding command for each
+kind of image:
+
+* **baseline**: `make build-baseline-all-<os/arch>`
+* **miking**: `make build-miking-all-<os/arch>`
+* **miking-dppl**: `make build-miking-dppl-all-<os/arch>`
+
+To build **ALL** images, run the command below. This requires that your podman
+or docker installation supports cross-platform builds. **Warning: This will
+likely take a very long time.**
+
+```sh
+make build-baseline-all-linux/amd64 \
+     build-baseline-all-linux/arm64 \
+     build-miking-all-linux/amd64 \
+     build-miking-all-linux/arm64 \
+     build-miking-dppl-all-linux/amd64 \
+     build-miking-dppl-all-linux/arm64
+```
+
+### Build All Images in Parallel (Experimental)
+There is experimental support for building images in parallel. This can be
+performed by running either
+```sh
+# If we also need to build a new baseline
+make seqbuild-from-baseline-all
+```
+
+or
+
+```sh
+# If we will reuse an existing baseline
+seqbuild-from-miking-all
+```
+
+This will take a lot of resources (CPU and RAM), and may overload the container
+build system.
+
+## Pushing to Docker Hub
+
+These instructions concerns the pushing of images to Docker Hub. If you are a
+developer and need to have push access, contact the core Miking team.
+
+
+### Pushing Images
+
+Sticking with the example of `debian12.6` for `linux/amd64`, push the build
+images to Docker Hub by running:
+
+```sh
+make push-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
+make push-miking   PLATFORM=linux/amd64 BASELINE=debian12.6
+```
+
+The primary reason for pushing baseline images is to avoid having to recreate
+them on new releases of Miking. Hence we do not create any manifests for these
+images.
+
+
+### Pushing Manifests
 
 Once all architectures have been built and pushed for an image, push the
 manifests to Docker Hub by the following make rule:
 
 ```sh
-make -C miking-alpine push-manifests
+make push-manifest-miking
 ```
 
-This will make the `mikinglang/miking:latest-alpine` tag available on Docker
-Hub. In the case of `make -C miking-cuda push-manifests`, the
-`mikinglang/miking:latest-cuda` tag would be available on Docker Hub. If image
-marked as the `LATEST_ALIAS` has its manifest pushed, then the
-`mikinglang/miking:latest` tag would also be available on Docker Hub.
+This will create manifests for the following tags:
 
-# Running the Image
+ * `mikinglang/miking:latest`
+ * `mikinglang/miking:latest-<baseline>`
+ * `mikinglang/miking:<miver>`
+ * `mikinglang/miking:<miver>-<baseline>`
+
+The baseline used for `latest` and `<miver>` tags is specified by the
+`BASELINE_IMPLICIT` variable shown when running `make print-variables`.
+
+## Running the Image
 
 To verify that the build image can evaluate and compile MCore programs, the
 _test_ directory contains a _sample.mc_ program to test with.
 
-## Verify Evaluation
+
+### Verify Evaluation
 
 Run the following command:
 
@@ -125,7 +222,7 @@ Found msg: "bar"
 Found nothing.
 ```
 
-## Verify Compilation
+### Verify Compilation
 
 **NOTE:** Compilation is highly specific to the target platform. If planning to
 run the compiled program outside the docker container, verify that your binary
@@ -158,29 +255,96 @@ been validated for. Copy paste this checklist to your PR description:
 ```
 **Validated builds:**
 
-- [ ] miking-alpine (amd64 / x86_64)
-- [ ] miking-alpine (arm64 / M1 Mac)
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:debian12.6 (aarch64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:debian12.6 (aarch64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated x86_64 Tests: (On separate machine from build server.)**
+
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated ARM64 Mac Tests:**
+
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:debian12.6 (aarch64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:debian12.6 (aarch64)
 
 **Validated GPU tests:**
 
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] test-cuda (x86_64)
 ```
 
 It should look like this when formatted by GitHub:
 
 **Validated builds:**
 
-- [ ] miking-alpine (amd64 / x86_64)
-- [ ] miking-alpine (arm64 / M1 Mac)
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:debian12.6 (aarch64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:debian12.6 (aarch64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
 
-**Validated GPU tests:**
+**Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking-cuda (amd64 / x86_64)
+- [ ] miking:alpine3.20 (x86_64)
+- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:cuda11.4 (x86_64)
+- [ ] miking-dppl:alpine3.20 (x86_64)
+- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:cuda11.4 (x86_64)
+
+**Validated ARM64 Mac Tests:**
+
+- [ ] miking:alpine3.20 (aarch64)
+- [ ] miking:debian12.6 (aarch64)
+- [ ] miking-dppl:alpine3.20 (aarch64)
+- [ ] miking-dppl:debian12.6 (aarch64)
+
+**Validated Special Tests:**
+
+- [ ] test-cuda (x86_64)
 
 Tick each box under "Validated builds" once the build is validated. A build is
 validated when the miking image successfully builds with all tests passing. If
-an image is also listed under "Validated GPU tests", the command
-`make -C <DIR> test-gpu/<arch>` must also be run which runs additional tests
-with a GPU. Tick the box if and only if this test has also succeeded.
+an image is also listed under "Validated Special Tests", the Makefile-rule with
+the same name as the test must successfully be run before ticking the box.
+
+### Commands for Validating Tests
+Use these commands to validate tests.
+
+```sh
+# Validate `miking` image
+docker run --rm mikinglang/miking:<miking tag> make -C /src/miking install test-all test-sundials
+
+# Validate `miking-dppl` image
+docker run --rm mikinglang/miking:<dppl tag> make -C /src/miking install make
+
+# Set CONTAINER_RUNTIME for before running any of the makefile rules below
+
+# Validate test-cuda (requires that you are located in a Miking DPPL repostitory)
+make test-cuda
+
+# Convenience for validating all AMD64 tests
+make test-all-amd64
+
+# Convenience for validating all ARM64 tests
+make test-all-arm64
+```

@@ -1,26 +1,24 @@
-ARG PLATFORM_OWL_CFLAGS
-
-FROM nvidia/cuda:11.4.3-devel-ubuntu20.04
+FROM docker.io/library/debian:12.6
 
 SHELL ["/bin/bash", "-c"]
 
 WORKDIR /root
 
-# Add a nice PS1 for bash
-RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc
+# bashrc setting: PS1, ls format, and new PATH to include mi destination
+RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc \
+ && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
+ && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
-# Where the built mi image will be placed
-RUN echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
-
-# (ls with color is already enabled on ubuntu)
-
-# Install dependencies and opam (also need to add the Nvidia key)
+# Install dependencies and opam
 RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
- && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys A4B469963BF863CC \
  && apt-get update \
  && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
- && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 libpython3-dev libtinfo-dev libgmp-dev build-essential curl libffi-dev libffi7 libgmp-dev libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
- && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.1.2/opam-2.1.2-x86_64-linux \
+ && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial \
+    nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 \
+    libpython3-dev libtinfo-dev libgmp-dev build-essential libffi-dev \
+    libffi8 libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
+    autoconf \
+ && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
  && chmod +x /usr/local/bin/opam
 
 # Install sundials manually
@@ -37,19 +35,20 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
-ARG TARGETPLATFORM
+ARG TARGET_PLATFORM
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
-# 2. Create the 5.0.0~rc1 environment
+# 2. Create the 5.0.0 environment
  && opam switch create miking-ocaml 5.0.0 \
+ && eval $(opam env --switch=miking-ocaml) \
 # 3. Setup platform compiler specific flags
  && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
  && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
  && export EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math" \
  && export EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math" \
- && if [[ "$TARGETPLATFORM" == "linux/amd64" ]]; then \
+ && if [[ "$TARGET_PLATFORM" == "linux/amd64" ]]; then \
         export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
     fi \
  && echo "OWL_CFLAGS=\"$OWL_CFLAGS\"" >> /root/imgbuild_flags.txt \
@@ -57,7 +56,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
- && opam install -y dune linenoise pyml toml lwt owl ocamlformat.0.24.1 \
+ && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.0.10.0 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
@@ -79,27 +78,7 @@ RUN opam init --disable-sandboxing --auto-setup \
 # Add the opam environment as default
 RUN echo "eval \$(opam env)" >> /root/.bashrc
 
-# Install Futhark
-RUN export PATH="/root/.ghcup/bin:$PATH" \
- && curl --proto '=https' --tlsv1.2 -sSf https://get-ghcup.haskell.org | \
-    BOOTSTRAP_HASKELL_NONINTERACTIVE=1 \
-    BOOTSTRAP_HASKELL_GHC_VERSION=9.2.5 \
-    BOOTSTRAP_HASKELL_CABAL_VERSION=3.6.2 \
-    BOOTSTRAP_HASKELL_INSTALL_NO_STACK=1 \
-    BOOTSTRAP_HASKELL_ADJUST_BASHRC=P \
-    sh \
- && cd /src \
- && wget https://github.com/diku-dk/futhark/archive/refs/tags/v0.22.4.zip \
- && unzip v0.22.4.zip \
- && cd futhark-0.22.4 \
- && make configure build install \
- && cd /src \
- && rm -rf /root/.cabal /root/.ghcup /src/futhark-0.22.4 /src/v0.22.4.zip
-
 WORKDIR /root
-
-# Indicate that this baseline image has support for accelerate
-ENV MIKING_HAS_FEATURE_ACCELERATE="1"
 
 # Export the opam env contents to docker ENV
 ENV PATH="/root/.opam/miking-ocaml/bin:/root/.local/bin:$PATH"
@@ -107,17 +86,13 @@ ENV MANPATH="$MANPATH:/root/.opam/miking-ocaml/man"
 ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
 ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
 ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
-ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
 
-# For some reason this environment variable is wrongly configured in the source image...
-ENV LD_LIBRARY_PATH="/usr/local/cuda/lib:/usr/local/cuda/lib64:/usr/local/lib:$LD_LIBRARY_PATH"
+# The config seems to exist under /etc/ld.so.conf.d, but OCaml does not seem
+# to respect this when linking externals. Then we run the command below to
+# ensure that the environment variable corresponds to what we would expect.
+ARG TARGET_LD_LIBRARY_PATH
+ENV LD_LIBRARY_PATH="$TARGET_LD_LIBRARY_PATH"
 
-# Add CPATH to allow GCC to access the CUDA includes
-ENV CPATH="/usr/local/cuda/include"
-
-# The ld linker also does not play nice with LD_LIBRARY_PATH, create some
-# symbolic links for the libraries:
-RUN mkdir -p /usr/local/lib64 \
- && ls /usr/local/cuda/lib64/*.so | xargs ln -s -t /usr/local/lib64
+RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
 
 CMD ["bash"]

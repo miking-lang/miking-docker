@@ -65,17 +65,26 @@ def print_env(d):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Validate the output from a docker inspect [image]")
-    parser.add_argument("-A", "--arch", dest="arch", metavar="NAME", type=str, default=None,
-                        help="Validate the architecture of the produced image.")
     parser.add_argument("image", type=str,
                         help="The image to inspect")
+    parser.add_argument("--platform", dest="platform", metavar="NAME", type=str, default=None,
+                        help="Validate the platform of the produced image. (<os>/<arch>)")
+    parser.add_argument("--runtime", choices=["docker", "podman"], default="docker",
+                        help="Which runtime that is being used. (Default: docker)")
     args = parser.parse_args()
 
-    try:
-        jsonstr = subprocess.check_output(f"docker inspect {args.image}", shell=True)
-    except subprocess.CalledProcessError as e:
-        print(e)
-        sys.exit(e.returncode)
+    if args.runtime == "docker":
+        try:
+            jsonstr = subprocess.check_output(f"docker inspect {args.image}", shell=True)
+        except subprocess.CalledProcessError as e:
+            print(e)
+            sys.exit(e.returncode)
+    elif args.runtime == "podman":
+        try:
+            jsonstr = subprocess.check_output(f"podman inspect {args.image}", shell=True)
+        except subprocess.CalledProcessError as e:
+            print(e)
+            sys.exit(e.returncode)
 
     # Output from `docker inspect` should not be more than 10 MB... just a precaution
     blob = json.loads(jsonstr)
@@ -84,8 +93,10 @@ if __name__ == "__main__":
             pwarn(f"Expected exactly one entry in blob, received {len(blob)}")
         blob = blob[0]
 
-    if args.arch is not None and blob["Architecture"] != args.arch:
-        perror(f"Architecture assertion failed. Expected \"{args.arch}\", got \"{blob['Architecture']}\"")
+    osarch = f"{blob['Os']}/{blob['Architecture']}"
+
+    if args.platform is not None and osarch != args.platform:
+        perror(f"Platform assertion failed. Expected \"{args.platform}\", got \"{osarch}\"")
 
     # This is just for information, so relax the correctness a bit... (assertions should be done above)
     funcs = [print_tag, print_arch, print_env]
