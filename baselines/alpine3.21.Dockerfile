@@ -1,4 +1,6 @@
-FROM docker.io/library/debian:12.6
+FROM docker.io/library/alpine:3.21
+
+RUN apk add bash
 
 SHELL ["/bin/bash", "-c"]
 
@@ -9,17 +11,23 @@ RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\03
  && echo "alias ls='ls --color=auto'" >> /root/.bashrc \
  && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
-# Install dependencies and opam
-RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
- && apt-get update \
- && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
- && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial \
-    nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 \
-    libpython3-dev libtinfo-dev libgmp-dev build-essential libffi-dev \
-    libffi8 libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
-    autoconf \
- && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
- && chmod +x /usr/local/bin/opam
+# Install dependencies available through apk
+RUN apk add opam make cmake m4 bubblewrap git rsync mercurial gcc g++ curl \
+    linux-headers zlib-dev libc-dev openblas-dev lapack-dev nodejs-current openjdk17 \
+    autoconf pkgconfig wget fuse3-dev
+
+# Install tup manually (dependends on pkgconfig and fuse3-dev)
+# NOTE: There was a 0.8 version available at the time of writing this
+#       Dockerfile. But since debian install 0.7.11, we do that here too.
+RUN mkdir -p /src/tup \
+ && cd /src/tup \
+ && wget https://gittup.org/tup/releases/tup-v0.7.11.tar.gz \
+ && tar -xzvf tup-v0.7.11.tar.gz \
+ && cd tup-v0.7.11 \
+ && ./build.sh \
+ && cp build/tup /usr/local/bin/tup \
+ && cd /src \
+ && rm -rf /src/tup
 
 # Install sundials manually
 RUN mkdir -p /src/sundials \
@@ -55,8 +63,9 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "OWL_AEOS_CFLAGS=\"$OWL_AEOS_CFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
-# 4. Install ocaml packages
- && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.0.10.0 ocamlformat.0.24.1 \
+# 4. Install ocaml packages (there is a bug with that conf-openblas cannot find alpine packages, so treat this package separately)
+ && opam install -y --no-depexts conf-openblas.0.2.1 \
+ && opam install -y --assume-depexts dune linenoise menhir pyml toml lwt owl.0.10.0 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
@@ -86,13 +95,5 @@ ENV MANPATH="$MANPATH:/root/.opam/miking-ocaml/man"
 ENV OPAM_SWITCH_PREFIX="/root/.opam/miking-ocaml"
 ENV CAML_LD_LIBRARY_PATH="/root/.opam/miking-ocaml/lib/stublibs:/root/.opam/miking-ocaml/lib/ocaml/stublibs:/root/.opam/miking-ocaml/lib/ocaml"
 ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
-
-# The config seems to exist under /etc/ld.so.conf.d, but OCaml does not seem
-# to respect this when linking externals. Then we run the command below to
-# ensure that the environment variable corresponds to what we would expect.
-ARG TARGET_LD_LIBRARY_PATH
-ENV LD_LIBRARY_PATH="$TARGET_LD_LIBRARY_PATH"
-
-RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
 
 CMD ["bash"]

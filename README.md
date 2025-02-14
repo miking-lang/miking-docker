@@ -79,14 +79,14 @@ hardware architecture.
 
 ### Individual Baseline Image
 
-Using the `debian12.6` baseline for x86_64 as an example, we build it by
+Using the `debian12.9` baseline for x86_64 as an example, we build it by
 running:
 
 ```sh
-make build-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
+make build-baseline PLATFORM=linux/amd64 BASELINE=debian12.9
 ```
 
-This will create the `mikinglang/baseline:<ver>-debian12.6-linux-amd64` image.
+This will create the `mikinglang/baseline:<ver>-debian12.9-linux-amd64` image.
 
 
 ### Individual Miking Image
@@ -95,11 +95,11 @@ After the baseline image has been built, the `miking` image can now be built
 by:
 
 ```sh
-make build-miking PLATFORM=linux/amd64 BASELINE=debian12.6
+make build-miking PLATFORM=linux/amd64 BASELINE=debian12.9
 ```
 
 This will create the versioned image
-`mikinglang/miking:<miver>-debian12.6-linux-amd64`.
+`mikinglang/miking:<miver>-debian12.9-linux-amd64`.
 
 
 ### Individual Miking DPPL Image
@@ -108,11 +108,11 @@ After the `miking` image has been built, the `miking-dppl` image can now be
 built by:
 
 ```sh
-make build-miking-dppl PLATFORM=linux/amd64 BASELINE=debian12.6
+make build-miking-dppl PLATFORM=linux/amd64 BASELINE=debian12.9
 ```
 
 This will create the versioned image
-`mikinglang/miking-dppl:<dpplver>-debian12.6-linux-amd64`.
+`mikinglang/miking-dppl:<dpplver>-debian12.9-linux-amd64`.
 
 
 ### All Images
@@ -168,12 +168,12 @@ developer and need to have push access, contact the core Miking team.
 
 ### Pushing Images
 
-Sticking with the example of `debian12.6` for `linux/amd64`, push the build
+Sticking with the example of `debian12.9` for `linux/amd64`, push the build
 images to Docker Hub by running:
 
 ```sh
-make push-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
-make push-miking   PLATFORM=linux/amd64 BASELINE=debian12.6
+make push-baseline PLATFORM=linux/amd64 BASELINE=debian12.9
+make push-miking   PLATFORM=linux/amd64 BASELINE=debian12.9
 ```
 
 The primary reason for pushing baseline images is to avoid having to recreate
@@ -255,32 +255,32 @@ been validated for. Copy paste this checklist to your PR description:
 ```
 **Validated builds:**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (x86_64)
-- [ ] miking:debian12.6 (aarch64)
+- [ ] miking:alpine3.21 (x86_64)
+- [ ] miking:alpine3.21 (aarch64)
+- [ ] miking:debian12.9 (x86_64)
+- [ ] miking:debian12.9 (aarch64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (x86_64)
-- [ ] miking-dppl:debian12.6 (aarch64)
+- [ ] miking-dppl:alpine3.21 (x86_64)
+- [ ] miking-dppl:alpine3.21 (aarch64)
+- [ ] miking-dppl:debian12.9 (x86_64)
+- [ ] miking-dppl:debian12.9 (aarch64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:alpine3.21 (x86_64)
+- [ ] miking:debian12.9 (x86_64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:alpine3.21 (x86_64)
+- [ ] miking-dppl:debian12.9 (x86_64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (aarch64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (aarch64)
+- [ ] miking:alpine3.21 (aarch64)
+- [ ] miking:debian12.9 (aarch64)
+- [ ] miking-dppl:alpine3.21 (aarch64)
+- [ ] miking-dppl:debian12.9 (aarch64)
 
 **Validated GPU tests:**
 
@@ -291,32 +291,32 @@ It should look like this when formatted by GitHub:
 
 **Validated builds:**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (x86_64)
-- [ ] miking:debian12.6 (aarch64)
+- [ ] miking:alpine3.21 (x86_64)
+- [ ] miking:alpine3.21 (aarch64)
+- [ ] miking:debian12.9 (x86_64)
+- [ ] miking:debian12.9 (aarch64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (x86_64)
-- [ ] miking-dppl:debian12.6 (aarch64)
+- [ ] miking-dppl:alpine3.21 (x86_64)
+- [ ] miking-dppl:alpine3.21 (aarch64)
+- [ ] miking-dppl:debian12.9 (x86_64)
+- [ ] miking-dppl:debian12.9 (aarch64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:debian12.6 (x86_64)
+- [ ] miking:alpine3.21 (x86_64)
+- [ ] miking:debian12.9 (x86_64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:debian12.6 (x86_64)
+- [ ] miking-dppl:alpine3.21 (x86_64)
+- [ ] miking-dppl:debian12.9 (x86_64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (aarch64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (aarch64)
+- [ ] miking:alpine3.21 (aarch64)
+- [ ] miking:debian12.9 (aarch64)
+- [ ] miking-dppl:alpine3.21 (aarch64)
+- [ ] miking-dppl:debian12.9 (aarch64)
 
 **Validated Special Tests:**
 

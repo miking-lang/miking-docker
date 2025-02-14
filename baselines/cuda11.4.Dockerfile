@@ -17,7 +17,7 @@ RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
  && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial nodejs \
     libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 libpython3-dev \
     libtinfo-dev libgmp-dev build-essential curl libffi-dev libffi7 libgmp-dev \
-    libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk autoconf \
+    libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk autoconf tup \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
  && chmod +x /usr/local/bin/opam
 
@@ -113,7 +113,9 @@ ENV PKG_CONFIG_PATH="/root/.opam/miking-ocaml/lib/pkgconfig"
 ARG TARGET_LD_LIBRARY_PATH
 ENV LD_LIBRARY_PATH="$TARGET_LD_LIBRARY_PATH"
 
-RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
+RUN echo "[1] $LD_LIBRARY_PATH" \
+ && echo "[2] $(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" \
+ && test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
 
 # Add CPATH to allow GCC to access the CUDA includes
 ENV CPATH="/usr/local/cuda/include"

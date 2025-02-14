@@ -28,6 +28,14 @@ supported architectures, are:
  * [`debian12.6`](https://hub.docker.com/_/debian): linux/amd64, linux/arm64/v8
  * [`cuda11.4`](https://hub.docker.com/nvidia/cuda): linux/amd64
 
+### Using tup
+
+Miking has support for using `tup` to do more intelligent testing when modifying files. However, since tup depends on fuse, you need to provide the following arguments when using tup inside the docker container:
+
+```
+--cap-add SYS_ADMIN --device /dev/fuse
+```
+
 ### CUDA Runtime Dependencies
 
 If you wish to use any GPU features from Miking then you need to use the

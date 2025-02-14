@@ -25,9 +25,9 @@ endif
 
 SHELL = bash
 
-VERSION_BASELINE    = v8
-VERSION_MIKING      = dev12
-VERSION_MIKING_DPPL = dev1
+VERSION_BASELINE    = v9
+VERSION_MIKING      = dev13
+VERSION_MIKING_DPPL = dev2
 
 IMAGENAME_BASELINE    = mikinglang/baseline
 IMAGENAME_MIKING      = mikinglang/miking
@@ -36,20 +36,20 @@ IMAGENAME_MIKING_DPPL = mikinglang/miking-dppl
 BUILD_LOGDIR = _logs
 
 MIKING_GIT_REMOTE = https://github.com/miking-lang/miking.git
-MIKING_GIT_COMMIT = c36fcc7cf8bae3f2352cc6500a9940b6e8c97476
+MIKING_GIT_COMMIT = c77a73a7769b8070688a3a1b4fb52946ea838392
 
 MIKING_DPPL_GIT_REMOTE = https://github.com/miking-lang/miking-dppl.git
-MIKING_DPPL_GIT_COMMIT = 6bad5a74da2538a6d014ee47796dbf298f1a575c
+MIKING_DPPL_GIT_COMMIT = b0163baa7f6b0f08fa483e14fe6a1a4b5d797226
 
 VALIDATE_PLATFORM_SCRIPT = ./scripts/validate_platform.py
 VALIDATE_IMAGE_SCRIPT    = ./scripts/validate_image.py
 
-BASELINES_AMD64 = alpine3.20 debian12.6 cuda11.4
-BASELINES_ARM64 = alpine3.20 debian12.6
+BASELINES_AMD64 = alpine3.21 debian12.9 cuda11.4
+BASELINES_ARM64 = alpine3.21 debian12.9
 
 BASELINES_ALL = $(shell echo $(BASELINES_AMD64) $(BASELINES_ARM64) | tr ' ' '\n' | sort | uniq)
 
-BASELINE_IMPLICIT = debian12.6
+BASELINE_IMPLICIT = debian12.9
 
 print-variables:
 	@echo -e "\033[4;36mMakefile variables:\033[0m"
