@@ -17,7 +17,9 @@ RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
     nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 \
     libpython3-dev libtinfo-dev libgmp-dev build-essential libffi-dev \
     libffi8 libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
-    autoconf tup minizinc \
+    autoconf tup \
+    libgecode49 libgecodeflatzinc49 libgecode-dev flatzinc \
+    coinor-cbc coinor-libcbc-dev coinor-libipopt-dev \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
  && chmod +x /usr/local/bin/opam
 
@@ -34,6 +36,25 @@ RUN mkdir -p /src/sundials \
  && make install \
  && cd /src \
  && rm -rf sundials
+
+# Install Minizinc manually (coinbc not included in system package)
+RUN mkdir -p /src/minizinc \
+ && cd /src/minizinc \
+ && wget https://github.com/MiniZinc/libminizinc/archive/refs/tags/2.9.0.tar.gz \
+ && tar -xzvf 2.9.0.tar.gz \
+ && cd libminizinc-2.9.0 \
+ && cmake . \
+ && make \
+ && make install \
+ && cd /src \
+ && rm -rf minizinc \
+# Make sure that our custom installation has access to the gecode solver
+ && ln -s /usr/share/minizinc/gecode /usr/local/share/minizinc/gecode
+
+# Check that we are using the correct minizinc path (as opposed to /usr/bin/minizinc)
+RUN echo "[1] $(which minizinc)" \
+ && echo "[2] /usr/local/bin/minizinc" \
+ && test "$(which minizinc)" = "/usr/local/bin/minizinc"
 
 ARG TARGET_PLATFORM
 # NOTE: Running the opam setup as a single step to contain the downloading and
@@ -69,7 +90,18 @@ RUN opam init --disable-sandboxing --auto-setup \
  && make install \
  && cd /src \
  && rm -rf sundialsml \
-# 6. Clean up stuff we no longer need
+# 6. Install ipoptml
+ && opam install -y alcotest ctypes ctypes-foreign \
+ && mkdir -p /src/ipoptml \
+ && cd /src/ipoptml \
+ && git clone https://github.com/br4sco/ipoptml \
+ && cd ipoptml \
+ && git checkout 28e6723e756756c18cc64f311a23a203b518025b \
+ && sed -i 's/ctypes.foreign/ctypes-foreign/g' dune-project \
+ && dune build \
+ && dune runtest \
+ && dune install \
+# 7. Clean up stuff we no longer need
  && opam clean -rca \
  && rm -rf /root/.opam/repo           \
            /root/.opam/download-cache \

@@ -43,6 +43,40 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
+# Minizinc and all of its dependencies are missing from Alpine's packages. Need
+# to build them manually.
+# Note: This will install Gecode 6.3.1. Version 6.2.0 cannot compile due to a
+#       type error.
+RUN mkdir -p /src/gecode \
+ && cd /src/gecode \
+ && wget https://github.com/Gecode/gecode/archive/fec7e9fd99bca98f146416ba8ea8adc278f5a95a.tar.gz \
+ && tar -xzvf fec7e9fd99bca98f146416ba8ea8adc278f5a95a.tar.gz \
+ && cd gecode-fec7e9fd99bca98f146416ba8ea8adc278f5a95a \
+ && mkdir build \
+ && cd build \
+ && cmake .. \
+ && make \
+ && make install \
+ && OLD BELOW \
+ && cd gecode-release-6.2.0 \
+ && ./configure \
+ && make \
+ && **************** TODO: INSTALL COINOR_CBC *************************** \
+ && mkdir -p /src/coinor-coinutils && cd /src/coinor-coinutils \
+ && wget https://github.com/coin-or/CoinUtils/archive/refs/tags/releases/2.11.12.tar.gz \
+ && tar -xzvf 2.11.12.tar.gz && cd CoinUtils-releases-2.11.12 \
+ && ./configure \
+ && mkdir -p /src/coinor-cbc \
+ && cd /src/coinor-cbc \
+ && wget https://github.com/coin-or/Cbc/archive/refs/tags/releases/2.10.12.tar.gz \
+ && tar -xzvf 2.10.12.tar.gz \
+ && cd Cbc-releases-2.10.12 \
+ && ./configure \
+ && make ????????????????
+
+
+# configure: error: One or more required packages CoinUtils, Osi, and Cgl are not available.
+
 ARG TARGET_PLATFORM
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
