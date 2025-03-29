@@ -12,6 +12,7 @@ RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\03
  && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies and opam
+ARG TARGET_PLATFORM
 RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
  && apt-get update \
  && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
@@ -22,7 +23,17 @@ RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
     autoconf tup \
     libgecode49 libgecodeflatzinc49 libgecode-dev \
     coinor-cbc coinor-libcbc-dev \
- && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
+# Install Opam as standalone to avoid installing OCaml as a system package
+ && if [[ "$TARGET_PLATFORM" == "linux/amd64" ]]; then \
+        export OPAM_DOWNLOAD_URL="https://github.com/ocaml/opam/releases/download/2.3.0/opam-2.3.0-x86_64-linux"; \
+    elif [[ "$TARGET_PLATFORM" == "linux/arm64" ]]; then \
+        export OPAM_DOWNLOAD_URL="https://github.com/ocaml/opam/releases/download/2.3.0/opam-2.3.0-arm64-linux"; \
+    else \
+        echo "Unrecognized target platform $TARGET_PLATFORM"; \
+        exit 1; \
+    fi \
+ && echo "OPAM_DOWNLOAD_URL=\"$OPAM_DOWNLOAD_URL\"" >> /root/imgbuild_flags.txt \
+ && curl -L -o /usr/local/bin/opam "$OPAM_DOWNLOAD_URL" \
  && chmod +x /usr/local/bin/opam \
 # Install flatzinc separately as a .deb to avoid installing minizinc
  && mkdir -p /src/flatzinc \
@@ -65,9 +76,9 @@ RUN echo "[1] $(which minizinc)" \
  && echo "[2] /usr/local/bin/minizinc" \
  && test "$(which minizinc)" = "/usr/local/bin/minizinc"
 
-ARG TARGET_PLATFORM
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
+ARG TARGET_PLATFORM
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0 environment
@@ -88,15 +99,18 @@ RUN opam init --disable-sandboxing --auto-setup \
 # 4. Install ocaml packages
  && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.1.2 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
- && eval $(opam env) \
+ && eval $(opam env --switch=miking-ocaml) \
  && mkdir -p /src/sundialsml \
  && cd /src/sundialsml \
  && wget https://github.com/inria-parkas/sundialsml/archive/refs/tags/v6.1.1p1.zip \
  && unzip v6.1.1p1.zip \
  && cd sundialsml-6.1.1p1 \
+# There is an outdated "bigarray" config that works with dune for OCaml 5, but
+# not with ocamlfind. We use sed to patch this.
+ && sed -i 's/requires = "bigarray"/requires = ""/g' src/META.in \
  && ./configure \
  && make \
- && make install-findlib \
+ && make install \
  && cd /src \
  && rm -rf sundialsml \
 # 6. Clean up stuff we no longer need
@@ -106,7 +120,7 @@ RUN opam init --disable-sandboxing --auto-setup \
            /root/.opam/default
 
 # Add the opam environment as default
-RUN echo "eval \$(opam env)" >> /root/.bashrc
+RUN echo "eval \$(opam env --switch=miking-ocaml)" >> /root/.bashrc
 
 WORKDIR /root
 
