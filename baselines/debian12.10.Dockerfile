@@ -1,4 +1,4 @@
-FROM docker.io/library/debian:12.9
+FROM docker.io/library/debian:12.10
 
 SHELL ["/bin/bash", "-c"]
 
@@ -18,10 +18,13 @@ RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
     libpython3-dev libtinfo-dev libgmp-dev build-essential libffi-dev \
     libffi8 libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
     autoconf tup \
-    libgecode49 libgecodeflatzinc49 libgecode-dev flatzinc \
-    coinor-cbc coinor-libcbc-dev coinor-libipopt-dev \
+    libgecode49 libgecodeflatzinc49 libgecode-dev \
+    coinor-cbc coinor-libcbc-dev \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
- && chmod +x /usr/local/bin/opam
+ && chmod +x /usr/local/bin/opam \
+# Install flatzinc separately as a .deb to avoid installing minizinc
+ && apt-get download flatzinc \
+ && dpkg -i flatzinc*.deb
 
 # Install sundials manually
 RUN mkdir -p /src/sundials \
@@ -90,18 +93,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && make install \
  && cd /src \
  && rm -rf sundialsml \
-# 6. Install ipoptml
- && opam install -y alcotest ctypes ctypes-foreign \
- && mkdir -p /src/ipoptml \
- && cd /src/ipoptml \
- && git clone https://github.com/br4sco/ipoptml \
- && cd ipoptml \
- && git checkout 28e6723e756756c18cc64f311a23a203b518025b \
- && sed -i 's/ctypes.foreign/ctypes-foreign/g' dune-project \
- && dune build \
- && dune runtest \
- && dune install \
-# 7. Clean up stuff we no longer need
+# 6. Clean up stuff we no longer need
  && opam clean -rca \
  && rm -rf /root/.opam/repo           \
            /root/.opam/download-cache \

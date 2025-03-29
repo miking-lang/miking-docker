@@ -21,11 +21,11 @@ your program can place its output files.
 
 The default Miking image with the `latest` tag is based on Debian 12.6. We also
 provide additional baselines that can be specified with `latest-<baseline>` or
-`<ver>-<baseline>`, e.g. `latest-debian12.6`. These baselines, and their
+`<ver>-<baseline>`, e.g. `latest-debian12.10`. These baselines, and their
 supported architectures, are:
 
  * [`alpine3.20`](https://hub.docker.com/_/alpine): linux/amd64, linux/arm64/v8
- * [`debian12.6`](https://hub.docker.com/_/debian): linux/amd64, linux/arm64/v8
+ * [`debian12.10`](https://hub.docker.com/_/debian): linux/amd64, linux/arm64/v8
  * [`cuda11.4`](https://hub.docker.com/nvidia/cuda): linux/amd64
 
 ### Using tup

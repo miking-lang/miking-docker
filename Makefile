@@ -44,12 +44,12 @@ MIKING_DPPL_GIT_COMMIT = b0163baa7f6b0f08fa483e14fe6a1a4b5d797226
 VALIDATE_PLATFORM_SCRIPT = ./scripts/validate_platform.py
 VALIDATE_IMAGE_SCRIPT    = ./scripts/validate_image.py
 
-BASELINES_AMD64 = alpine3.21 debian12.9 cuda11.4
-BASELINES_ARM64 = alpine3.21 debian12.9
+BASELINES_AMD64 = alpine3.21 debian12.10 cuda11.4
+BASELINES_ARM64 = alpine3.21 debian12.10
 
 BASELINES_ALL = $(shell echo $(BASELINES_AMD64) $(BASELINES_ARM64) | tr ' ' '\n' | sort | uniq)
 
-BASELINE_IMPLICIT = debian12.9
+BASELINE_IMPLICIT = debian12.10
 
 print-variables:
 	@echo -e "\033[4;36mMakefile variables:\033[0m"
