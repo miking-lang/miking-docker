@@ -2,6 +2,8 @@ FROM docker.io/library/debian:12.10
 
 SHELL ["/bin/bash", "-c"]
 
+ENV OPAMROOTISOK="1"
+
 WORKDIR /root
 
 # bashrc setting: PS1, ls format, and new PATH to include mi destination
@@ -23,8 +25,12 @@ RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
  && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
  && chmod +x /usr/local/bin/opam \
 # Install flatzinc separately as a .deb to avoid installing minizinc
+ && mkdir -p /src/flatzinc \
+ && cd /src/flatzinc \
  && apt-get download flatzinc \
- && dpkg -i flatzinc*.deb
+ && dpkg -i flatzinc*.deb \
+ && cd /src \
+ && rm -rf flatzinc
 
 # Install sundials manually
 RUN mkdir -p /src/sundials \
@@ -80,7 +86,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
- && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.0.10.0 ocamlformat.0.24.1 \
+ && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.1.2 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env) \
  && mkdir -p /src/sundialsml \
@@ -90,7 +96,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && cd sundialsml-6.1.1p1 \
  && ./configure \
  && make \
- && make install \
+ && make install-findlib \
  && cd /src \
  && rm -rf sundialsml \
 # 6. Clean up stuff we no longer need

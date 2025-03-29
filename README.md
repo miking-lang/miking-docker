@@ -255,31 +255,23 @@ been validated for. Copy paste this checklist to your PR description:
 ```
 **Validated builds:**
 
-- [ ] miking:alpine3.21 (x86_64)
-- [ ] miking:alpine3.21 (aarch64)
 - [ ] miking:debian12.10 (x86_64)
 - [ ] miking:debian12.10 (aarch64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.21 (x86_64)
-- [ ] miking-dppl:alpine3.21 (aarch64)
 - [ ] miking-dppl:debian12.10 (x86_64)
 - [ ] miking-dppl:debian12.10 (aarch64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking:alpine3.21 (x86_64)
 - [ ] miking:debian12.10 (x86_64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.21 (x86_64)
 - [ ] miking-dppl:debian12.10 (x86_64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
-- [ ] miking:alpine3.21 (aarch64)
 - [ ] miking:debian12.10 (aarch64)
-- [ ] miking-dppl:alpine3.21 (aarch64)
 - [ ] miking-dppl:debian12.10 (aarch64)
 
 **Validated GPU tests:**
@@ -291,31 +283,23 @@ It should look like this when formatted by GitHub:
 
 **Validated builds:**
 
-- [ ] miking:alpine3.21 (x86_64)
-- [ ] miking:alpine3.21 (aarch64)
 - [ ] miking:debian12.10 (x86_64)
 - [ ] miking:debian12.10 (aarch64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.21 (x86_64)
-- [ ] miking-dppl:alpine3.21 (aarch64)
 - [ ] miking-dppl:debian12.10 (x86_64)
 - [ ] miking-dppl:debian12.10 (aarch64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking:alpine3.21 (x86_64)
 - [ ] miking:debian12.10 (x86_64)
 - [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.21 (x86_64)
 - [ ] miking-dppl:debian12.10 (x86_64)
 - [ ] miking-dppl:cuda11.4 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
-- [ ] miking:alpine3.21 (aarch64)
 - [ ] miking:debian12.10 (aarch64)
-- [ ] miking-dppl:alpine3.21 (aarch64)
 - [ ] miking-dppl:debian12.10 (aarch64)
 
 **Validated Special Tests:**
