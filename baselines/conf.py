@@ -28,12 +28,7 @@ def build_args(args):
     common_args = [f"TARGET_PLATFORM={args.platform}"]
 
     static_args = {
-        "cuda11.4": {
-            "linux/amd64": {
-                "TARGET_LD_LIBRARY_PATH": "/usr/local/cuda/targets/x86_64-linux/lib:/usr/local/cuda-11/targets/x86_64-linux/lib:/usr/local/cuda-11.4/targets/x86_64-linux/lib:/usr/local/lib:/usr/local/nvidia/lib:/usr/local/nvidia/lib64:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu",
-            },
-        },
-        "debian12.10": {
+        "debian13.2": {
             "linux/amd64": {
                 "TARGET_LD_LIBRARY_PATH": "/usr/lib/x86_64-linux-gnu/libfakeroot:/usr/local/lib:/usr/local/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu",
             },
