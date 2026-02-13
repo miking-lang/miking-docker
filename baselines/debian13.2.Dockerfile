@@ -82,7 +82,7 @@ ARG TARGET_PLATFORM
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0 environment
- && opam switch create miking-ocaml 5.3.0 \
+ && opam switch create miking-ocaml 5.1.1 \
  && eval $(opam env --switch=miking-ocaml) \
 # 3. Setup platform compiler specific flags
  && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
