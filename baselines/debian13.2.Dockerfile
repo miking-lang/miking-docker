@@ -82,7 +82,7 @@ ARG TARGET_PLATFORM
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0 environment
- && opam switch create miking-ocaml 5.1.1 \
+ && opam switch create miking-ocaml 5.0.0 \
  && eval $(opam env --switch=miking-ocaml) \
 # 3. Setup platform compiler specific flags
  && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
@@ -97,7 +97,7 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
- && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.1.2 ocamlformat.0.24.1 \
+ && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.2 owl.1.2 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env --switch=miking-ocaml) \
  && mkdir -p /src/sundialsml \
