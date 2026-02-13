@@ -97,7 +97,10 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
- && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.2 owl.1.2 ocamlformat.0.24.1 \
+ && opam install -y dune linenoise menhir pyml toml lwt \
+        conf-openblas.0.2.2 owl.1.2 \
+        ocamlformat.0.24.1 \
+        base.v0.16.3 bigarray-compat.1.1.0 ocamlbuild.0.15.0 ocamlfind.1.9.0 stdcompat.21.1 \
 # 5. Install sundialsml manually (to ensure correct version)
  && eval $(opam env --switch=miking-ocaml) \
  && mkdir -p /src/sundialsml \
