@@ -85,10 +85,10 @@ RUN opam init --disable-sandboxing --auto-setup \
  && opam switch create miking-ocaml 5.0.0 \
  && eval $(opam env --switch=miking-ocaml) \
 # 3. Setup platform compiler specific flags
- && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
- && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
- && export EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math" \
- && export EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math" \
+ && export OWL_CFLAGS="-g -O3 -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
+ && export OWL_AEOS_CFLAGS="-g -O3 -DSFMT_MEXP=19937 -fno-strict-aliasing" \
+ && export EIGENCPP_OPTFLAGS="-O3" \
+ && export EIGEN_FLAGS="-O3" \
  && if [[ "$TARGET_PLATFORM" == "linux/amd64" ]]; then \
         export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
     fi \
