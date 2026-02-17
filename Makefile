@@ -35,14 +35,11 @@ IMAGENAME_MIKING_DPPL = mikinglang/miking-dppl
 
 BUILD_LOGDIR = _logs
 
-# Temporary remotes for testing purposes
 MIKING_GIT_REMOTE = https://github.com/miking-lang/miking.git
 MIKING_GIT_COMMIT = bf152f8f9bf0c0d119d921cfa4894a08bfab5c23
-#MIKING_GIT_REMOTE = https://github.com/miking-lang/miking.git
-#MIKING_GIT_COMMIT = c77a73a7769b8070688a3a1b4fb52946ea838392
 
 MIKING_DPPL_GIT_REMOTE = https://github.com/miking-lang/miking-dppl.git
-MIKING_DPPL_GIT_COMMIT = b0163baa7f6b0f08fa483e14fe6a1a4b5d797226
+MIKING_DPPL_GIT_COMMIT = 212dc89667a83c3de9c21821e6e15a200c3a7721
 
 VALIDATE_PLATFORM_SCRIPT = ./scripts/validate_platform.py
 VALIDATE_IMAGE_SCRIPT    = ./scripts/validate_image.py
