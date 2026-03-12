@@ -1,6 +1,8 @@
-FROM docker.io/library/debian:12.6
+FROM docker.io/library/debian:13.2
 
 SHELL ["/bin/bash", "-c"]
+
+ENV OPAMROOTISOK="1"
 
 WORKDIR /root
 
@@ -10,16 +12,36 @@ RUN echo "export PS1='\[\e]0;\u@\h: \w\a\]\[\033[01;32m\]\u@\h\[\033[00m\]:\[\03
  && echo "export PATH=/root/.local/bin:\$PATH" >> /root/.bashrc
 
 # Install dependencies and opam
+ARG TARGET_PLATFORM
 RUN DEBIAN_FRONTEND=noninteractive echo "Installing dependencies" \
  && apt-get update \
- && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
  && apt-get install -y curl time cmake wget unzip git rsync m4 mercurial \
     nodejs libopenblas-dev liblapacke-dev pkg-config zlib1g-dev python3 \
-    libpython3-dev libtinfo-dev libgmp-dev build-essential libffi-dev \
-    libffi8 libgmp10 libncurses-dev libncurses5 libtinfo5 openjdk-17-jdk \
-    autoconf \
- && curl -L -o /usr/local/bin/opam https://github.com/ocaml/opam/releases/download/2.2.1/opam-2.2.1-x86_64-linux \
- && chmod +x /usr/local/bin/opam
+    libpython3-dev libncurses-dev libgmp-dev build-essential libffi-dev \
+    libffi8 libgmp10 libncurses-dev libncurses6 libtinfo6 openjdk-25-jdk \
+    autoconf tup \
+    libgecode49t64 libgecodeflatzinc49t64 libgecode-dev \
+    libqt6core6t64 libqt6gui6 libqt6printsupport6 libqt6widgets6 \
+    coinor-cbc coinor-libcbc-dev \
+# Install Opam as standalone to avoid installing OCaml as a system package
+ && if [[ "$TARGET_PLATFORM" == "linux/amd64" ]]; then \
+        export OPAM_DOWNLOAD_URL="https://github.com/ocaml/opam/releases/download/2.5.0/opam-2.5.0-x86_64-linux"; \
+    elif [[ "$TARGET_PLATFORM" == "linux/arm64" ]]; then \
+        export OPAM_DOWNLOAD_URL="https://github.com/ocaml/opam/releases/download/2.5.0/opam-2.5.0-arm64-linux"; \
+    else \
+        echo "Unrecognized target platform $TARGET_PLATFORM"; \
+        exit 1; \
+    fi \
+ && echo "OPAM_DOWNLOAD_URL=\"$OPAM_DOWNLOAD_URL\"" >> /root/imgbuild_flags.txt \
+ && curl -L -o /usr/local/bin/opam "$OPAM_DOWNLOAD_URL" \
+ && chmod +x /usr/local/bin/opam \
+# Install flatzinc separately as a .deb to avoid installing minizinc
+ && mkdir -p /src/flatzinc \
+ && cd /src/flatzinc \
+ && apt-get download gecode-flatzinc \
+ && dpkg -i gecode-flatzinc*.deb \
+ && cd /src \
+ && rm -rf flatzinc
 
 # Install sundials manually
 RUN mkdir -p /src/sundials \
@@ -35,19 +57,38 @@ RUN mkdir -p /src/sundials \
  && cd /src \
  && rm -rf sundials
 
-ARG TARGET_PLATFORM
+# Install Minizinc manually (coinbc not included in system package)
+RUN mkdir -p /src/minizinc \
+ && cd /src/minizinc \
+ && wget https://github.com/MiniZinc/libminizinc/archive/refs/tags/2.9.0.tar.gz \
+ && tar -xzvf 2.9.0.tar.gz \
+ && cd libminizinc-2.9.0 \
+ && cmake . \
+ && make \
+ && make install \
+ && cd /src \
+ && rm -rf minizinc \
+# Make sure that our custom installation has access to the gecode solver
+ && ln -s /usr/share/minizinc/gecode /usr/local/share/minizinc/gecode
+
+# Check that we are using the correct minizinc path (as opposed to /usr/bin/minizinc)
+RUN echo "[1] $(which minizinc)" \
+ && echo "[2] /usr/local/bin/minizinc" \
+ && test "$(which minizinc)" = "/usr/local/bin/minizinc"
+
 # NOTE: Running the opam setup as a single step to contain the downloading and
 #       cleaning of unwanted files in the same layer.
+ARG TARGET_PLATFORM
 # 1. Initialize opam
 RUN opam init --disable-sandboxing --auto-setup \
 # 2. Create the 5.0.0 environment
  && opam switch create miking-ocaml 5.0.0 \
  && eval $(opam env --switch=miking-ocaml) \
 # 3. Setup platform compiler specific flags
- && export OWL_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
- && export OWL_AEOS_CFLAGS="-g -O3 -Ofast -funroll-loops -ffast-math -DSFMT_MEXP=19937 -fno-strict-aliasing" \
- && export EIGENCPP_OPTFLAGS="-Ofast -funroll-loops -ffast-math" \
- && export EIGEN_FLAGS="-O3 -Ofast -funroll-loops -ffast-math" \
+ && export OWL_CFLAGS="-g -O3 -DSFMT_MEXP=19937 -fno-strict-aliasing -Wno-tautological-constant-out-of-range-compare" \
+ && export OWL_AEOS_CFLAGS="-g -O3 -DSFMT_MEXP=19937 -fno-strict-aliasing" \
+ && export EIGENCPP_OPTFLAGS="-O3" \
+ && export EIGEN_FLAGS="-O3" \
  && if [[ "$TARGET_PLATFORM" == "linux/amd64" ]]; then \
         export OWL_CFLAGS="$OWL_CFLAGS -mfpmath=sse -msse2"; \
     fi \
@@ -56,14 +97,18 @@ RUN opam init --disable-sandboxing --auto-setup \
  && echo "EIGENCPP_OPTFLAGS=\"$EIGENCPP_OPTFLAGS\"" >> /root/imgbuild_flags.txt \
  && echo "EIGEN_FLAGS=\"$EIGEN_FLAGS\"" >> /root/imgbuild_flags.txt \
 # 4. Install ocaml packages
- && opam install -y dune linenoise menhir pyml toml lwt conf-openblas.0.2.1 owl.0.10.0 ocamlformat.0.24.1 \
+ && opam install -y dune linenoise menhir pyml toml lwt utop ocamlbuild \
+                    conf-openblas.0.2.2 owl.1.2 ocamlformat.0.24.1 \
 # 5. Install sundialsml manually (to ensure correct version)
- && eval $(opam env) \
+ && eval $(opam env --switch=miking-ocaml) \
  && mkdir -p /src/sundialsml \
  && cd /src/sundialsml \
  && wget https://github.com/inria-parkas/sundialsml/archive/refs/tags/v6.1.1p1.zip \
  && unzip v6.1.1p1.zip \
  && cd sundialsml-6.1.1p1 \
+# There is an outdated "bigarray" config that works with dune for OCaml 5, but
+# not with ocamlfind. We use sed to patch this.
+ && sed -i 's/requires = "bigarray"/requires = ""/g' src/META.in \
  && ./configure \
  && make \
  && make install \
@@ -76,7 +121,7 @@ RUN opam init --disable-sandboxing --auto-setup \
            /root/.opam/default
 
 # Add the opam environment as default
-RUN echo "eval \$(opam env)" >> /root/.bashrc
+RUN echo "eval \$(opam env --switch=miking-ocaml)" >> /root/.bashrc
 
 WORKDIR /root
 
@@ -93,6 +138,8 @@ ENV OCAML_TOPLEVEL_PATH="/root/.opam/miking-ocaml/lib/toplevel"
 ARG TARGET_LD_LIBRARY_PATH
 ENV LD_LIBRARY_PATH="$TARGET_LD_LIBRARY_PATH"
 
-RUN test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
+RUN echo "[1] $LD_LIBRARY_PATH" \
+ && echo "[2] $(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" \
+ && test "$(cat /etc/ld.so.conf.d/*.conf | sed '/^#.*/d' | paste -sd ':' -)" = "$LD_LIBRARY_PATH"
 
 CMD ["bash"]

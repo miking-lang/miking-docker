@@ -19,29 +19,17 @@ your program can place its output files.
 
 ### Architecture Support
 
-The default Miking image with the `latest` tag is based on Debian 12.6. We also
+The default Miking image with the `latest` tag is based on Debian 13.2. We also
 provide additional baselines that can be specified with `latest-<baseline>` or
-`<ver>-<baseline>`, e.g. `latest-debian12.6`. These baselines, and their
+`<ver>-<baseline>`, e.g. `latest-debian13.2`. These baselines, and their
 supported architectures, are:
 
- * [`alpine3.20`](https://hub.docker.com/_/alpine): linux/amd64, linux/arm64/v8
- * [`debian12.6`](https://hub.docker.com/_/debian): linux/amd64, linux/arm64/v8
- * [`cuda11.4`](https://hub.docker.com/nvidia/cuda): linux/amd64
+ * [`debian13.2`](https://hub.docker.com/_/debian): linux/amd64, linux/arm64/v8
 
-### CUDA Runtime Dependencies
+### Using tup
 
-If you wish to use any GPU features from Miking then you need to use the
-`latest-cuda11.4` tag, for example like:
+Miking has support for using `tup` to do more intelligent testing when modifying files. However, since tup depends on fuse, you need to provide the following arguments when using tup inside the docker container:
 
 ```
-docker run --rm -it \
-           --gpus all \
-           -v $(pwd):/mnt:ro \
-           mikinglang/miking:latest-cuda11.4 bash
+--cap-add SYS_ADMIN --device /dev/fuse
 ```
-
-The `latest-cuda11.4` tag is based on Ubuntu with CUDA 11.4. As such, **CUDA
-with version 11.4 or greater** is required on the host system in order to run
-the miking-cuda image. See the docker documentation on
-[Runtime options with Memory, CPUs, and GPUs](https://docs.docker.com/config/containers/resource_constraints/#gpu)
-for information on how to set up docker on the host system to work with GPUs.

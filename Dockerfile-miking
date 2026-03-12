@@ -22,7 +22,6 @@ WORKDIR /src/miking
 RUN eval $(opam env)   \
  && make install       \
  && make test-all      \
- && make test-sundials \
  && make clean
 
 WORKDIR /root

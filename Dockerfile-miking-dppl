@@ -14,13 +14,13 @@ RUN mkdir -p /src \
 
 WORKDIR /src/miking-dppl
 
+ENV MCORE_LIBS="coreppl=/root/.local/src/coreppl:$MCORE_LIBS"
+
 RUN eval $(opam env) \
  && make install \
  && make test \
  && make clean
 
 WORKDIR /root
-
-ENV MCORE_LIBS="coreppl=/root/.local/src/coreppl:$MCORE_LIBS"
 
 CMD ["cppl"]

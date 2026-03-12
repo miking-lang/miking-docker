@@ -79,14 +79,14 @@ hardware architecture.
 
 ### Individual Baseline Image
 
-Using the `debian12.6` baseline for x86_64 as an example, we build it by
+Using the `debian13.2` baseline for x86_64 as an example, we build it by
 running:
 
 ```sh
-make build-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
+make build-baseline PLATFORM=linux/amd64 BASELINE=debian13.2
 ```
 
-This will create the `mikinglang/baseline:<ver>-debian12.6-linux-amd64` image.
+This will create the `mikinglang/baseline:<ver>-debian13.2-linux-amd64` image.
 
 
 ### Individual Miking Image
@@ -95,11 +95,11 @@ After the baseline image has been built, the `miking` image can now be built
 by:
 
 ```sh
-make build-miking PLATFORM=linux/amd64 BASELINE=debian12.6
+make build-miking PLATFORM=linux/amd64 BASELINE=debian13.2
 ```
 
 This will create the versioned image
-`mikinglang/miking:<miver>-debian12.6-linux-amd64`.
+`mikinglang/miking:<miver>-debian13.2-linux-amd64`.
 
 
 ### Individual Miking DPPL Image
@@ -108,11 +108,11 @@ After the `miking` image has been built, the `miking-dppl` image can now be
 built by:
 
 ```sh
-make build-miking-dppl PLATFORM=linux/amd64 BASELINE=debian12.6
+make build-miking-dppl PLATFORM=linux/amd64 BASELINE=debian13.2
 ```
 
 This will create the versioned image
-`mikinglang/miking-dppl:<dpplver>-debian12.6-linux-amd64`.
+`mikinglang/miking-dppl:<dpplver>-debian13.2-linux-amd64`.
 
 
 ### All Images
@@ -168,12 +168,12 @@ developer and need to have push access, contact the core Miking team.
 
 ### Pushing Images
 
-Sticking with the example of `debian12.6` for `linux/amd64`, push the build
+Sticking with the example of `debian13.2` for `linux/amd64`, push the build
 images to Docker Hub by running:
 
 ```sh
-make push-baseline PLATFORM=linux/amd64 BASELINE=debian12.6
-make push-miking   PLATFORM=linux/amd64 BASELINE=debian12.6
+make push-baseline PLATFORM=linux/amd64 BASELINE=debian13.2
+make push-miking   PLATFORM=linux/amd64 BASELINE=debian13.2
 ```
 
 The primary reason for pushing baseline images is to avoid having to recreate
@@ -255,72 +255,40 @@ been validated for. Copy paste this checklist to your PR description:
 ```
 **Validated builds:**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (x86_64)
-- [ ] miking:debian12.6 (aarch64)
-- [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (x86_64)
-- [ ] miking-dppl:debian12.6 (aarch64)
-- [ ] miking-dppl:cuda11.4 (x86_64)
+- [ ] miking:debian13.2 (x86_64)
+- [ ] miking:debian13.2 (aarch64)
+- [ ] miking-dppl:debian13.2 (x86_64)
+- [ ] miking-dppl:debian13.2 (aarch64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:debian12.6 (x86_64)
-- [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:debian12.6 (x86_64)
-- [ ] miking-dppl:cuda11.4 (x86_64)
+- [ ] miking:debian13.2 (x86_64)
+- [ ] miking-dppl:debian13.2 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (aarch64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (aarch64)
-
-**Validated GPU tests:**
-
-- [ ] test-cuda (x86_64)
+- [ ] miking:debian13.2 (aarch64)
+- [ ] miking-dppl:debian13.2 (aarch64)
 ```
 
 It should look like this when formatted by GitHub:
 
 **Validated builds:**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (x86_64)
-- [ ] miking:debian12.6 (aarch64)
-- [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (x86_64)
-- [ ] miking-dppl:debian12.6 (aarch64)
-- [ ] miking-dppl:cuda11.4 (x86_64)
+- [ ] miking:debian13.2 (x86_64)
+- [ ] miking:debian13.2 (aarch64)
+- [ ] miking-dppl:debian13.2 (x86_64)
+- [ ] miking-dppl:debian13.2 (aarch64)
 
 **Validated x86_64 Tests: (On separate machine from build server.)**
 
-- [ ] miking:alpine3.20 (x86_64)
-- [ ] miking:debian12.6 (x86_64)
-- [ ] miking:cuda11.4 (x86_64)
-- [ ] miking-dppl:alpine3.20 (x86_64)
-- [ ] miking-dppl:debian12.6 (x86_64)
-- [ ] miking-dppl:cuda11.4 (x86_64)
+- [ ] miking:debian13.2 (x86_64)
+- [ ] miking-dppl:debian13.2 (x86_64)
 
 **Validated ARM64 Mac Tests:**
 
-- [ ] miking:alpine3.20 (aarch64)
-- [ ] miking:debian12.6 (aarch64)
-- [ ] miking-dppl:alpine3.20 (aarch64)
-- [ ] miking-dppl:debian12.6 (aarch64)
-
-**Validated Special Tests:**
-
-- [ ] test-cuda (x86_64)
+- [ ] miking:debian13.2 (aarch64)
+- [ ] miking-dppl:debian13.2 (aarch64)
 
 Tick each box under "Validated builds" once the build is validated. A build is
 validated when the miking image successfully builds with all tests passing. If
@@ -332,15 +300,12 @@ Use these commands to validate tests.
 
 ```sh
 # Validate `miking` image
-docker run --rm mikinglang/miking:<miking tag> make -C /src/miking install test-all test-sundials
+docker run --rm mikinglang/miking:<miking tag> make -C /src/miking install test-all
 
 # Validate `miking-dppl` image
 docker run --rm mikinglang/miking:<dppl tag> make -C /src/miking install make
 
 # Set CONTAINER_RUNTIME for before running any of the makefile rules below
-
-# Validate test-cuda (requires that you are located in a Miking DPPL repostitory)
-make test-cuda
 
 # Convenience for validating all AMD64 tests
 make test-all-amd64
